@@ -1,0 +1,5 @@
+ioconf comso
+
+include "conf/files"
+
+pseudo-device	comso
