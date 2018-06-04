@@ -1,0 +1,20 @@
+Please note that diffs are not public domain; they are subject to the
+copyright notices on the relevant files.
+
+===================================================================
+RCS file: /ftp/cvs/cvsroot/src/sys/lib/libunwind/AddressSpace.hpp,v
+rcsdiff: /ftp/cvs/cvsroot/src/sys/lib/libunwind/AddressSpace.hpp,v: warning: Unknown phrases like `commitid ...;' are present.
+retrieving revision 1.8
+retrieving revision 1.9
+diff -u -p -r1.8 -r1.9
+--- src/sys/lib/libunwind/AddressSpace.hpp	2015/01/29 20:05:56	1.8
++++ src/sys/lib/libunwind/AddressSpace.hpp	2017/11/02 16:09:33	1.9
+@@ -140,7 +140,7 @@ public:
+     } while (byte >= 0x80);
+     // sign extend negative numbers
+     if ((byte & 0x40) != 0)
+-      result |= (-1LL) << bit;
++      result |= (~0ULL) << bit;
+     return result;
+   }
+ 

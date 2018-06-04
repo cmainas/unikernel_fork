@@ -7,12 +7,12 @@ int main()
 {
 	int d = open("/dev/comso", O_RDONLY), n;
 	char buf[30];
-	printf("SERVER: fd: %d\n",d);
+	printf("USERSPACE: fd: %d\n",d);
 	n = read(d, buf, 30);
 	if (n < 0)
 		perror("read:");
-	printf("SERVER: read %d bytes\n", n);
-	printf("SERVER: Got message: %s\n", buf);
+	printf("USERSPACE: read %d bytes\n", n);
+	printf("USERSPACE: Got message: %s\n", buf);
 	close(d);
 	return 0;
 }

@@ -9,19 +9,9 @@
 
 #include <netinet/in.h>
 
-//#include <net/if.h>
-//#include <net/netisr.h>
-//#include <netinet/in.h>
-//#include <netinet/in_var.h>
-//#include <netinet/ip_var.h>
-//#include <netinet/if_inarp.h>
-
-
-struct comso_stuff
-{
-	struct socket *so;
-	struct sockaddr_in sa;
-};
+#define PORT	23456	//The port that will be used
+//IP of the server
+#define SERVER_IP	(((((192 << 8) | 168) << 8) | 1) << 8) | 13
 
 #endif
 
