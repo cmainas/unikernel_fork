@@ -1,6 +1,6 @@
 #!/bin/bash 
 
-RUMPRUN_REPO=/home/xenus/unikernels/paixnidi/syscall/rumprun
+RUMPRUN_REPO=/path/to/rumprun
 
 ## Check if libunwind is patched 
 is_patched=$(grep "\-1LL" ${RUMPRUN_REPO}/src-netbsd/sys/lib/libunwind/AddressSpace.hpp)
@@ -16,7 +16,7 @@ cp syscalls.master ${RUMPRUN_REPO}/src-netbsd/sys/kern/
 DIR=${PWD}
 cd ${RUMPRUN_REPO}/src-netbsd/sys/kern/
 chmod +x makesyscalls.sh
-./syscalls.sh syscalls.conf syscalls.master
+./makesyscalls.sh syscalls.conf syscalls.master
 cd $DIR
 echo "cp sys_my_pipe.c ${RUMPRUN_REPO}/src-netbsd/sys/kern/"
 cp sys_my_pipe.c ${RUMPRUN_REPO}/src-netbsd/sys/kern/

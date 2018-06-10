@@ -24,6 +24,7 @@ const struct fileops my_pipeops = {
 struct my_pipe_data {
 	struct socket *so;
 	struct sockaddr_in *sin;
+	int fd;
 };
 
 #define PORT		23456	//the port that will be used
@@ -36,7 +37,6 @@ struct my_pipe_data {
 int my_pipe_close(file_t *fp)
 {
 	/* close the socket */
-	printf("Hello from close my pipe\n");
 	struct my_pipe_data *mpd = fp->f_data; 
 	fp->f_data = NULL;
 	soclose(mpd->so);
@@ -49,14 +49,13 @@ int my_pipe_close(file_t *fp)
 int my_pipe_read(file_t *fp, off_t *offset, struct uio *uio, kauth_cred_t cred,
 		int flags)
 {
-	printf("Hello from read my pipe\n");
 	struct my_pipe_data *rmpd = fp->f_data; 
-	struct socket *so = rmpd->so;
 	int ret = 0, rcvflags = 0;;
 	struct sockaddr *from = NULL;
 	/* Wait for a connection and receive message. 
 	** The message is passed to userspace */
-	ret = soreceive(so, (struct mbuf **) &from, uio, NULL, NULL, &rcvflags);
+	ret = soreceive(rmpd->so, (struct mbuf **) &from, uio, NULL, NULL,
+		       	&rcvflags);
 	printf("Incoming connection\n");
 	return ret;
 }
@@ -67,13 +66,11 @@ int my_pipe_read(file_t *fp, off_t *offset, struct uio *uio, kauth_cred_t cred,
 int my_pipe_write(file_t *fp, off_t *offset, struct uio *uio, kauth_cred_t cred,
 	       	int flags)
 {
-	printf("Hello from write my pipe\n");
 	struct my_pipe_data *wmpd = fp->f_data; 
-	struct socket *so = wmpd->so;
 	int ret = 0;
-	struct sockaddr_in *sin = wmpd->sin;
 	/* Send the message from userspace */
-	ret = sosend(so, (struct sockaddr *)sin, uio, NULL, NULL, 0, curlwp);
+	ret = sosend(wmpd->so, (struct sockaddr *)wmpd->sin, uio, NULL, NULL,
+		       	0, curlwp);
 	return ret;
 }
 
@@ -110,7 +107,7 @@ int sys_my_pipe(struct lwp *l, const struct sys_my_pipe_args *uap,
 	struct my_pipe_data *rd, *wd;
 	struct socket *rso, *wso;
 	struct sockaddr_in *rsin, *wsin;
-	printf("hello from my pipe\n");
+	/* allocate memory */
 	if ((rd = malloc(sizeof(struct my_pipe_data), M_TEMP, M_WAITOK)) == 
 		NULL)
 		return ENOMEM;
@@ -123,6 +120,7 @@ int sys_my_pipe(struct lwp *l, const struct sys_my_pipe_args *uap,
 	if ((wsin = malloc(sizeof(struct my_pipe_data), M_TEMP, M_WAITOK)) == 
 		NULL)
 		return ENOMEM;
+	/* create sockets */
 	if ((error = socreate(AF_INET, &(rso), SOCK_DGRAM, 0, l, NULL)) 
 			!= 0)
 		return error;
@@ -143,11 +141,13 @@ int sys_my_pipe(struct lwp *l, const struct sys_my_pipe_args *uap,
 	if (error)
 		return error;
 	fd[0] = descr;
+	rd->fd = fd[0];
 	/* allocate write end of pipe */
 	error = fd_allocfile(&wf, &descr);
 	if (error)
 		goto my_pipe_error;
 	fd[1] = descr;
+	wd->fd = fd[1];
 	/* initialization of read file_t */
 	rf->f_flag = FREAD;
 	rf->f_type = DTYPE_MISC;
