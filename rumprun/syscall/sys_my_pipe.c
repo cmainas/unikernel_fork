@@ -37,6 +37,7 @@ struct my_pipe_data {
 int my_pipe_close(file_t *fp)
 {
 	/* close the socket */
+	/* TODO free any allocated memory */
 	struct my_pipe_data *mpd = fp->f_data; 
 	fp->f_data = NULL;
 	soclose(mpd->so);
