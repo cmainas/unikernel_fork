@@ -12,7 +12,7 @@ IOCONF=	IVSHMEM.ioconf
 RUMP_COMPONENT=ioconf
 
 SRCS+=	ivshmem.c
-SRCS+=	ivshmem_component.c
+##SRCS+=	ivshmem_component.c
 
 CPPFLAGS+= -I${RUMPTOP}/librump/rumpkern
    

@@ -9,4 +9,4 @@ include "rump/dev/files.rump"
 
 pseudo-root pci*
 
-ivshmem* at pci?
+ivshmem* at pci? dev ? function ?
