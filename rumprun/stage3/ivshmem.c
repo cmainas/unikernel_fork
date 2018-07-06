@@ -98,7 +98,7 @@ static void ivshmem_attach(device_t parent, device_t self, void *v)
 	//sc->reg_handle = ioh;
 	//sc->reg_size = iosize;
 	/* data region */
-	if (pci_mapreg_map(pa, PCI_BAR(2), PCI_MAPREG_TYPE_IO, 0, &iot, 
+	if (pci_mapreg_map(pa, PCI_BAR(2), PCI_MAPREG_TYPE_MEM, 0, &iot, 
 				&ioh, NULL, &iosize)) {
 		aprint_error_dev(self, "can't map data\n");
 		return;
