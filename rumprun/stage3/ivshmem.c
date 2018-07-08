@@ -17,12 +17,13 @@
 #include <dev/pci/pcivar.h>	/* For pci_get macros! */
 #include <dev/pci/pcireg.h>
 
+#include "../../kern/my_pipe.h"	/* for the my_pipe_generic struct */
+
 /* The softc holds our per-instance data. */
 struct ivshmem_softc {
 	device_t		dev;
 	pci_chipset_tag_t       pc;
 	pcitag_t                tag;
-	bus_dma_tag_t           dma_tag;
 	/* (mmio) control registers i.e. the "register memory region" */
 	bus_space_tag_t         reg_tag;
 	bus_space_handle_t      reg_handle;
@@ -31,6 +32,8 @@ struct ivshmem_softc {
 	bus_space_tag_t         data_tag;
 	bus_space_handle_t      data_handle;
 	bus_size_t              data_size;
+	bus_addr_t		data_base; 
+	bus_dma_tag_t           dma_tag;
         /* irq handling */
 	pci_intr_handle_t       *ihp;
 	unsigned int		irq;
@@ -52,7 +55,6 @@ CFATTACH_DECL_NEW(ivshmem, sizeof(struct ivshmem_softc), ivshmem_match,
 static int ivshmem_match(device_t dev, cfdata_t cf, void *v)
 {
 	struct pci_attach_args *pa;
-	//printf("IVSHMEM: Hello form ivshmem_match\n");
 	pa = (struct pci_attach_args *) v;
 	if (PCI_VENDOR(pa->pa_id) == PCI_VENDOR_QUMRANET) {
 		printf("IVSHMEM: Found match\n");
@@ -72,20 +74,19 @@ static void ivshmem_attach(device_t parent, device_t self, void *v)
 	//pci_intr_handle_t ih;
 	bus_space_tag_t iot;
 	bus_space_handle_t ioh;
+	bus_addr_t iobase; 
 	bus_size_t iosize; 
 	//char intrbuf[PCI_INTRSTR_LEN];
 	pci_chipset_tag_t pc = pa->pa_pc;
 	pcitag_t tag = pa->pa_tag;
-	pcireg_t csr;
+	//pcireg_t csr;
 	//pcireg_t id = pci_conf_read(pc, tag, PCI_SUBSYS_ID_REG);
 	
 	pci_aprint_devinfo(pa, NULL);
-	csr = pci_conf_read(pc, tag, PCI_COMMAND_STATUS_REG);
-	printf("csr: %08x\n", csr);
-	if ((csr & PCI_COMMAND_MEM_ENABLE) == 0) {
-		aprint_error_dev(self, "memory access is disabled\n");
-		return;
-	}
+	//if (pci_dma64_available(pa))
+	//	sc->dma_tag = pa->pa_dmat64;
+	//else 
+	//	sc->dma_tag = pa->pa_dmat;
 	sc->dev = self;
 	sc->pc = pc;
 	sc->tag = tag;
@@ -97,21 +98,20 @@ static void ivshmem_attach(device_t parent, device_t self, void *v)
 	//sc->reg_tag = iot;
 	//sc->reg_handle = ioh;
 	//sc->reg_size = iosize;
+
 	/* data region */
 	if (pci_mapreg_map(pa, PCI_BAR(2), PCI_MAPREG_TYPE_MEM, 0, &iot, 
-				&ioh, NULL, &iosize)) {
+				&ioh, &iobase, &iosize)) {
 		aprint_error_dev(self, "can't map data\n");
 		return;
 	}
 	sc->data_tag = iot;
 	sc->data_handle = ioh;
 	sc->data_size = iosize;
-	printf("IVSHMEM: tag %ld\n", iot);
-	printf("IVSHMEM: handle %ld\n", ioh);
-	printf("IVSHMEM: size %ld\n", iosize);
-	bus_space_write_4(sc->data_tag, sc->data_handle, 0, 77);
-	int tmp = bus_space_read_4(sc->data_tag, sc->data_handle, 0);
-	printf("IVSHMEM: read %d\n", tmp);
+	sc->data_base = iobase;
+	/* initialize my_pipe_generic struct */
+	mp_gen.data_s = iosize;
+	mp_gen.data_b = iobase;
 	/* interrupts */
 	return;
 }
@@ -130,6 +130,7 @@ static int ivshmem_detach(device_t dev, int flags)
 	if (sc->data_size) {
 		bus_space_unmap(sc->data_tag, sc->data_handle, sc->data_size);
 		sc->data_size = 0;
+		mp_gen.data_s = 0;
 	}
 	return 0;
 }
