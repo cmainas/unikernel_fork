@@ -110,8 +110,10 @@ static void ivshmem_attach(device_t parent, device_t self, void *v)
 	sc->data_size = iosize;
 	sc->data_base = iobase;
 	/* initialize my_pipe_generic struct */
-	mp_gen.data_s = iosize;
-	mp_gen.data_b = iobase;
+	sharme.data_s = iosize;
+	sharme.data_b = iobase;
+	sharme.data_t = iot;
+	sharme.data_h = ioh;
 	/* interrupts */
 	return;
 }
@@ -130,7 +132,10 @@ static int ivshmem_detach(device_t dev, int flags)
 	if (sc->data_size) {
 		bus_space_unmap(sc->data_tag, sc->data_handle, sc->data_size);
 		sc->data_size = 0;
-		mp_gen.data_s = 0;
+		sharme.data_s = 0;
+		sharme.data_b = 0;
+		sharme.data_t = 0;
+		sharme.data_h = 0;
 	}
 	return 0;
 }
