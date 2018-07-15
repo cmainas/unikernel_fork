@@ -25,7 +25,7 @@ int main()
 	fflush(stdout);
 	sleep(5);
 	buf[0] = 'Q';
-	n = write(fd[1], buf, 30);
+	n = write(fd[1], buf, 20);
 	if(n < 0)
 		perror("write");
 	printf("USERSPACE: wrote %d bytes\n", n);
