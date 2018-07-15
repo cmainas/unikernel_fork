@@ -19,7 +19,13 @@ build-rr.sh hw.
 $ rumprun kvm -g "-vga none -nographic -device ivshmem-plain,memdev=hostmem -object memory-backend-file,size=1M,share,mem-path=/dev/shm/ivshmem,id=hostmem" -i client-rumprun.bin
 $ rumprun kvm -g "-vga none -nographic -device ivshmem-plain,memdev=hostmem -object memory-backend-file,size=1M,share,mem-path=/dev/shm/ivshmem,id=hostmem" -i server-rumprun.bin
 ```
-Είναι σημαντικό να τρέξει πρώτα ο client και μετά ο server.
+Στο φάκελο test, υπάρχει ένα απλό παράδειγμα όπου ο server ανταλλάσει μηνύματα 
+με τον client.
+Στο φάκελο test1, υπάρχει ένα παράδειγμα όπου 2 clients γράφουν πολλά πράγματα
+στο pipe και ο server τα διαβάζει. 
+Στο φάκελο test2, υπάρχει ένα παράδειγμα όπου 1 client γράφει πολλά πράγματα
+στο pipe (πάνω από το pipe size) και ο server τα διαβάζει. Επίσης ελέγχεται 
+αν στην write χωρίς readers επιστρέφεται EPIPE.
 Αν όλα έχουν πάει καλά πρέπει να έχουν σταματήσει και οι 2 unikernels μετά από λίγο.
 
 
