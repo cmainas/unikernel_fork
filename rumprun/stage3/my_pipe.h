@@ -5,6 +5,7 @@
 struct my_pipe {
 	bus_size_t	init;		/* is shared memory initalized? */
 	bus_size_t	lock;		/* pipe lock */
+	bus_size_t	wr_lock;	/* writers lock */
 	bus_size_t	nreaders;	/* number of readers in pipe */
 	bus_size_t	nwriters;	/* number of writers in pipe */
 	bus_size_t	len;		/* size of pipe buffer */
@@ -23,9 +24,9 @@ struct my_pipe_op {
 };
 
 struct ivshm {
-	bus_size_t		data_s;
-	bus_addr_t		data_b;
-	bus_space_tag_t		data_t;
-	bus_space_handle_t	data_h;
+	bus_size_t		data_s;	/* size of shared memory */
+	bus_addr_t		data_b;	/* base address of shared memory */
+	bus_space_tag_t		data_t;	/* bus tag for shared memory */
+	bus_space_handle_t	data_h;	/* bus handle for shared memory */
 } sharme;
 

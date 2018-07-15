@@ -14,8 +14,8 @@ int my_pipe_read(file_t *fp, off_t *offset, struct uio *uio, kauth_cred_t cred,
 		int flags);
 int my_pipe_write(file_t *fp, off_t *offset, struct uio *uio, kauth_cred_t cred,
 		int flags);
-void pipe_lock(void);
-void pipe_unlock(void);
+void pipe_lock(bus_size_t lock);
+void pipe_unlock(bus_size_t lock);
 void read_region_1(bus_size_t offset, uint8_t *datap, bus_size_t count);
 void read_region_4(bus_size_t offset, uint32_t *datap, bus_size_t count);
 void write_region_1(bus_size_t offset, uint8_t *datap, bus_size_t count);
@@ -40,14 +40,14 @@ int my_pipe_close(file_t *fp)
 	uint8_t nparts[2];
 	fp->f_data = NULL;
 	free(op, M_TEMP);
-	pipe_lock();
+	pipe_lock(pipe->lock);
 	read_region_1(pipe->nreaders, nparts, 2);
 	if(op->oper == 0) 
 		nparts[0]--;
 	else if(op->oper == 1)
 		nparts[1]--;
 	write_region_1(pipe->nreaders, nparts, 2);
-	pipe_unlock();
+	pipe_unlock(pipe->lock);
 	if(op->oper == 0) 
 		pipe->pr_readers--;
 	else if(op->oper == 1)
@@ -83,7 +83,7 @@ int my_pipe_read(file_t *fp, off_t *offset, struct uio *uio, kauth_cred_t cred,
 			cnt = bus_space_read_4(sharme.data_t, sharme.data_h, 
 					pipe->cnt);
 		}
-		pipe_lock();
+		pipe_lock(pipe->lock);
 		read_region_4(pipe->len, bigs, 4);
 		len = bigs[0];
 		in = bigs[1];
@@ -99,7 +99,7 @@ int my_pipe_read(file_t *fp, off_t *offset, struct uio *uio, kauth_cred_t cred,
 			ret = uiomove((void *) (sharme.data_b + pipe->buf + out)
 					, size, uio);
 			if (ret) {
-				pipe_unlock();
+				pipe_unlock(pipe->lock);
 				break;
 			}
 			out += size;
@@ -119,7 +119,7 @@ int my_pipe_read(file_t *fp, off_t *offset, struct uio *uio, kauth_cred_t cred,
 		}
 		nwriters = bus_space_read_1(sharme.data_t, sharme.data_h, 
 				pipe->nwriters);
-		pipe_unlock();
+		pipe_unlock(pipe->lock);
 		if (nread > 0 && cnt == 0) 
 			break;
 		if (nwriters == 0) 
@@ -148,6 +148,7 @@ int my_pipe_write(file_t *fp, off_t *offset, struct uio *uio, kauth_cred_t cred,
 	cnt = bigs[3];
 	/* Send the message from userspace */
 	printf("WRITE1: len=%d, cnt=%d, in =%d\n", len, cnt, in);
+	pipe_lock(pipe->wr_lock);
 	while (uio->uio_resid) {
 		space = len - cnt;
 		while (space == 0) {
@@ -158,7 +159,7 @@ int my_pipe_write(file_t *fp, off_t *offset, struct uio *uio, kauth_cred_t cred,
 					pipe->cnt);
 			space = len - cnt;
 		}
-		pipe_lock();
+		pipe_lock(pipe->lock);
 		read_region_4(pipe->len, bigs, 4);
 		len = bigs[0];
 		in = bigs[1];
@@ -171,10 +172,12 @@ int my_pipe_write(file_t *fp, off_t *offset, struct uio *uio, kauth_cred_t cred,
 				size = uio->uio_resid;
 			else 
 				size = space;
+			if (size > (len - in))
+				size = len - in;
 			ret = uiomove((void *) (sharme.data_b + pipe->buf + in),
 					size, uio);
 			if(ret) {
-				pipe_unlock();
+				pipe_unlock(pipe->lock);
 				break;
 			}
 			in += size;
@@ -186,7 +189,7 @@ int my_pipe_write(file_t *fp, off_t *offset, struct uio *uio, kauth_cred_t cred,
 			printf("WRITE3: len=%d, cnt=%d, in =%d\n", len, cnt, in);
 			write_region_4(pipe->len, bigs, 4);
 		}
-		pipe_unlock();
+		pipe_unlock(pipe->lock);
 		nreaders = bus_space_read_1(sharme.data_t, sharme.data_h, 
 				pipe->nreaders);
 		if (nreaders == 0) {
@@ -194,6 +197,7 @@ int my_pipe_write(file_t *fp, off_t *offset, struct uio *uio, kauth_cred_t cred,
 			break;
 		}
 	}
+	pipe_unlock(pipe->wr_lock);
 	return ret;
 }
 
@@ -205,7 +209,7 @@ int sys_my_pipe(struct lwp *l, const struct sys_my_pipe_args *uap,
 	struct my_pipe *pipe = NULL;
 	struct my_pipe_op *ro = NULL, *wo = NULL;
 	uint8_t init; 
-	uint8_t smalls[4], nparts[2];
+	uint8_t smalls[5], nparts[2];
 	uint32_t bigs[4];
 
 	pipe = malloc(sizeof(struct my_pipe), M_TEMP, M_WAITOK);
@@ -219,7 +223,8 @@ int sys_my_pipe(struct lwp *l, const struct sys_my_pipe_args *uap,
 		goto malloc_fail;
 	pipe->init = 0;
 	pipe->lock = pipe->init + 1;
-	pipe->nreaders = pipe->lock + 1;
+	pipe->wr_lock = pipe->lock + 1;
+	pipe->nreaders = pipe->wr_lock + 1;
 	pipe->nwriters = pipe->nreaders + 1;
 	pipe->len = pipe->nwriters + 1;
 	pipe->in = pipe->len + 4;
@@ -234,19 +239,20 @@ int sys_my_pipe(struct lwp *l, const struct sys_my_pipe_args *uap,
 		smalls[1] = 0;
 		smalls[2] = 0;
 		smalls[3] = 0;
-		write_region_1(pipe->init, smalls, 4);
+		smalls[4] = 0;
+		write_region_1(pipe->init, smalls, 5);
 		bigs[0] = MY_PIPE_BUF_SIZE;
 		bigs[1] = 0;
 		bigs[2] = 0;
 		bigs[3] = 0;
 		write_region_4(pipe->len, bigs, 4);
 	}
-	pipe_lock();
+	pipe_lock(pipe->lock);
 	read_region_1(pipe->nreaders, nparts, 2);
 	nparts[0]++;
 	nparts[1]++;
 	write_region_1(pipe->nreaders, nparts, 2);
-	pipe_unlock();
+	pipe_unlock(pipe->lock);
 	ro->oper = 0;
 	wo->oper = 1;
 	ro->pipe = wo->pipe = pipe;
@@ -300,21 +306,29 @@ malloc_fail:
 	return ENOMEM;
 }
 
-void pipe_lock(void)
+void pipe_lock(bus_size_t lock)
 {
 	printf("Give me the lock\n");
-	while (bus_space_read_1(sharme.data_t, sharme.data_h, 
-			sharme.data_s - 2) == 1)
+	int i = 0;
+	while(__sync_val_compare_and_swap((uint8_t *)sharme.data_b + lock, 0, 1) == 1) {
+		i++;
+		if(i%10 == 0)
+			printf("still here waiting\n");
+
+	//while (bus_space_read_1(sharme.data_t, sharme.data_h, 
+	//		sharme.data_s - 2) == 1)
 		/* do nothing */; 
-	bus_space_write_1(sharme.data_t, sharme.data_h, sharme.data_s - 2, 1);
+	}
+	//bus_space_write_1(sharme.data_t, sharme.data_h, sharme.data_s - 2, 1);
 	printf("Got me the lock\n");
 	return;
 }
 
-void pipe_unlock(void) 
+void pipe_unlock(bus_size_t lock) 
 {
 	printf("Release the lock\n");
-	bus_space_write_1(sharme.data_t, sharme.data_h, sharme.data_s - 2, 0);
+	//bus_space_write_1(sharme.data_t, sharme.data_h, sharme.data_s - 2, 0);
+	__sync_lock_release((uint8_t *)sharme.data_b + lock);
 	printf("Lock released\n");
 	return;
 }
