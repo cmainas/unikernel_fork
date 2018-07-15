@@ -15,27 +15,27 @@ int main()
 		buf[0] = '0' + i/10;
 		buf[1] = '0' + i%10;
 		//n = write(fd[1], buf, 30);
-		n = write(fd[1], buf, 20);
+		n = write(fd[1], buf, 30);
 		if(n < 0)
 			perror("write");
 		printf("USERSPACE %d: wrote %d bytes\n", i, n);
 	}
 	sleep(5);
-	//printf("wait toread...\n");
-	//n = read(fd[0], buf, 30);
-	//if (n < 0)
-	//	perror("read:");
-	//printf("USERSPACE: read %d bytes\n", n);
-	//printf("USERSPACE: Got message: %s\n", buf);
+	printf("wait to read...\n");
+	n = read(fd[0], buf, 30);
+	if (n < 0)
+		perror("read:");
+	printf("USERSPACE: read %d bytes\n", n);
+	printf("USERSPACE: Got message: %s\n", buf);
+	close(fd[0]);
 	//fflush(stdout);
 	//sleep(5);
-	//buf[0] = 'Q';
-	//n = write(fd[1], buf, 30);
-	//if(n < 0)
-	//	perror("write");
-	//printf("USERSPACE: wrote %d bytes\n", n);
+	buf[0] = 'Q';
+	n = write(fd[1], buf, 30);
+	if(n < 0)
+		perror("write");
+	printf("USERSPACE: wrote %d bytes\n", n);
 	//fflush(stdout);
-	close(fd[0]);
 	close(fd[1]);
 	/* needs to wait a bit before halt */
 	return 0;
