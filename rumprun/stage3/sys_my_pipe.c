@@ -92,9 +92,9 @@ int my_pipe_read(file_t *fp, off_t *offset, struct uio *uio, kauth_cred_t cred,
 		printf("READ1: len=%d, cnt=%d, in=%d, out=%d\n", len, cnt, in, out);
 		if (cnt > 0) {
 			size = len - out;
-			if(size > cnt)
+			if (size > cnt)
 				size = cnt;
-			if(size > uio->uio_resid)
+			if (size > uio->uio_resid)
 				size = uio->uio_resid;
 			ret = uiomove((void *) (sharme.data_b + pipe->buf + out)
 					, size, uio);
@@ -120,7 +120,7 @@ int my_pipe_read(file_t *fp, off_t *offset, struct uio *uio, kauth_cred_t cred,
 		nwriters = bus_space_read_1(sharme.data_t, sharme.data_h, 
 				pipe->nwriters);
 		pipe_unlock();
-		if (nread > 0) 
+		if (nread > 0 && cnt == 0) 
 			break;
 		if (nwriters == 0) 
 			break;
@@ -302,20 +302,20 @@ malloc_fail:
 
 void pipe_lock(void)
 {
-	//printf("Give me the lock\n");
-	//while (bus_space_read_1(sharme.data_t, sharme.data_h, 
-	//		sharme.data_s - 2) == 1)
-	//	/* do nothing */; 
-	//bus_space_write_1(sharme.data_t, sharme.data_h, sharme.data_s - 2, 1);
-	//printf("Got me the lock\n");
+	printf("Give me the lock\n");
+	while (bus_space_read_1(sharme.data_t, sharme.data_h, 
+			sharme.data_s - 2) == 1)
+		/* do nothing */; 
+	bus_space_write_1(sharme.data_t, sharme.data_h, sharme.data_s - 2, 1);
+	printf("Got me the lock\n");
 	return;
 }
 
 void pipe_unlock(void) 
 {
-	//printf("Release the lock\n");
-	//bus_space_write_1(sharme.data_t, sharme.data_h, sharme.data_s - 2, 0);
-	//printf("Lock released\n");
+	printf("Release the lock\n");
+	bus_space_write_1(sharme.data_t, sharme.data_h, sharme.data_s - 2, 0);
+	printf("Lock released\n");
 	return;
 }
 
