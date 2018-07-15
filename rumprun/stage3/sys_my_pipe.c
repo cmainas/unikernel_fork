@@ -3,7 +3,6 @@
 #include <sys/file.h>
 #include <sys/proc.h>
 #include <sys/malloc.h>
-#include <sys/mman.h>
 #include <sys/bus.h> /* structs, prototypes for pci bus stuff and DEVMETHOD macros! */
 
 
@@ -33,13 +32,13 @@ const struct fileops my_pipeops = {
  */
 int my_pipe_close(file_t *fp)
 {
-	/* close the socket */
-	/* TODO free any allocated memory */
 	struct my_pipe_op *op = fp->f_data; 
 	struct my_pipe *pipe = op->pipe; 
 	uint8_t nparts[2];
 	fp->f_data = NULL;
+	/* free my_pipe_op struct of process */
 	free(op, M_TEMP);
+	/* decrease number of writers or readers in pipe */
 	pipe_lock(pipe->lock);
 	read_region_1(pipe->nreaders, nparts, 2);
 	if(op->oper == 0) 
@@ -48,16 +47,17 @@ int my_pipe_close(file_t *fp)
 		nparts[1]--;
 	write_region_1(pipe->nreaders, nparts, 2);
 	pipe_unlock(pipe->lock);
+	/* decrease number of writers or readers in pipe from current process */
 	if(op->oper == 0) 
 		pipe->pr_readers--;
 	else if(op->oper == 1)
 		pipe->pr_writers--;
+	/* free my_pipe struct if no readers and writers exist */
 	if(pipe->pr_readers == 0 && pipe->pr_writers == 0) 
 		free(pipe, M_TEMP);
-	if(nparts[0] == 0 && nparts[1] == 0) {
-		printf("hi\n");
+	/* clean used shared memory if no readers or writers exist */
+	if(nparts[0] == 0 && nparts[1] == 0) 
 		memset((void *)sharme.data_b, 0, 20 + MY_PIPE_BUF_SIZE);
-	}
 	return 0; /*this always succeeds */
 }
 
@@ -73,10 +73,16 @@ int my_pipe_read(file_t *fp, off_t *offset, struct uio *uio, kauth_cred_t cred,
 	size_t nread = 0, size;
 	uint8_t nwriters;
 	uint32_t bigs[4], cnt, len, in, out;
+	/* keep trying until userspace gets as many bytes as it asked or until
+	 * pipe gets empty*/
 	while (uio->uio_resid) {
+		/* wait until something is written in pipe, without acquiring
+		 * the lock */
 		cnt = bus_space_read_4(sharme.data_t, sharme.data_h, 
 				pipe->cnt);
 		while (cnt == 0) {
+			/* if no writers exist then return EOF or the bytes
+			 * that have been read until now */
 			if (bus_space_read_1(sharme.data_t, sharme.data_h,
 						pipe->nwriters) == 0) 
 				break;
@@ -90,7 +96,9 @@ int my_pipe_read(file_t *fp, off_t *offset, struct uio *uio, kauth_cred_t cred,
 		out = bigs[2];
 		cnt = bigs[3];
 		printf("READ1: len=%d, cnt=%d, in=%d, out=%d\n", len, cnt, in, out);
+		/* check with the lock if any data is available */
 		if (cnt > 0) {
+			/* determine the number of bytes that will be read */
 			size = len - out;
 			if (size > cnt)
 				size = cnt;
@@ -102,10 +110,13 @@ int my_pipe_read(file_t *fp, off_t *offset, struct uio *uio, kauth_cred_t cred,
 				pipe_unlock(pipe->lock);
 				break;
 			}
+			/* update out pointer and number of bytes in pipe */
 			out += size;
 			if (out >= len)
 				out = 0;
 			cnt -= size;
+			/* if all data has been read then start using the 
+			 * pipe buffer from the beginning */
 			if (cnt == 0) {
 				in = 0;
 				out = 0;
@@ -120,6 +131,7 @@ int my_pipe_read(file_t *fp, off_t *offset, struct uio *uio, kauth_cred_t cred,
 		nwriters = bus_space_read_1(sharme.data_t, sharme.data_h, 
 				pipe->nwriters);
 		pipe_unlock(pipe->lock);
+		/* if no data is available then return what has been read */
 		if (nread > 0 && cnt == 0) 
 			break;
 		if (nwriters == 0) 
@@ -141,33 +153,42 @@ int my_pipe_write(file_t *fp, off_t *offset, struct uio *uio, kauth_cred_t cred,
 	int size;
 	uint8_t nreaders;
 	uint32_t bigs[4], len, cnt, in;
-	read_region_4(pipe->len, bigs, 4);
-	len = bigs[0];
-	in = bigs[1];
+	//read_region_4(pipe->len, bigs, 4);
+	len = bus_space_read_4(sharme.data_t, sharme.data_h, pipe->len);
+	cnt = bus_space_read_4(sharme.data_t, sharme.data_h, pipe->cnt);
+	//len = bigs[0];
+	//in = bigs[1];
 	//out = bigs[2];
-	cnt = bigs[3];
-	/* Send the message from userspace */
-	printf("WRITE1: len=%d, cnt=%d, in =%d\n", len, cnt, in);
+	//cnt = bigs[3];
+	//printf("WRITE1: len=%d, cnt=%d, in =%d\n", len, cnt, in);
+	/* get the lock for writing (atomic write) */
 	pipe_lock(pipe->wr_lock);
+	/* keep trying until all bytes are written in pipe, or until all the 
+	 * readers leave */
 	while (uio->uio_resid) {
-		space = len - cnt;
-		while (space == 0) {
-			if (bus_space_read_1(sharme.data_t, sharme.data_h,
-						pipe->nreaders) == 0) 
+		//space = len - cnt;
+		/* wait for space, without acquiring the lock */
+		do {
+			/* if no readers exist then EPIPE must be returned */
+			nreaders = bus_space_read_1(sharme.data_t, 
+					sharme.data_h, 	pipe->nreaders);
+			if (nreaders == 0)
 				break;
 			cnt = bus_space_read_4(sharme.data_t, sharme.data_h,
 					pipe->cnt);
 			space = len - cnt;
-		}
+		} while (space == 0);
 		pipe_lock(pipe->lock);
 		read_region_4(pipe->len, bigs, 4);
 		len = bigs[0];
 		in = bigs[1];
+		printf("WRITE2: len=%d, cnt=%d, in =%d\n", len, cnt, in);
 		//out = bigs[2];
 		cnt = bigs[3];
-		printf("WRITE2: len=%d, cnt=%d, in =%d\n", len, cnt, in);
+		/* check for space with the lock */
 		space = len - cnt;
-		if (space > 0) {
+		if (space > 0 && nreaders != 0) {
+			/* determine tha number of bytes tha will be written */
 			if (space > uio->uio_resid)
 				size = uio->uio_resid;
 			else 
@@ -180,7 +201,9 @@ int my_pipe_write(file_t *fp, off_t *offset, struct uio *uio, kauth_cred_t cred,
 				pipe_unlock(pipe->lock);
 				break;
 			}
+			/* update in pointer and number of bytes in pipe */
 			in += size;
+			/* circular writing in buffer */
 			if (in >= len)
 				in = 0;
 			cnt += size;
@@ -189,9 +212,10 @@ int my_pipe_write(file_t *fp, off_t *offset, struct uio *uio, kauth_cred_t cred,
 			printf("WRITE3: len=%d, cnt=%d, in =%d\n", len, cnt, in);
 			write_region_4(pipe->len, bigs, 4);
 		}
-		pipe_unlock(pipe->lock);
 		nreaders = bus_space_read_1(sharme.data_t, sharme.data_h, 
 				pipe->nreaders);
+		pipe_unlock(pipe->lock);
+		/* if no readers exist return EPIPE */
 		if (nreaders == 0) {
 			ret = EPIPE;
 			break;
@@ -201,6 +225,9 @@ int my_pipe_write(file_t *fp, off_t *offset, struct uio *uio, kauth_cred_t cred,
 	return ret;
 }
 
+/*
+ * Handle the system call
+ */
 int sys_my_pipe(struct lwp *l, const struct sys_my_pipe_args *uap, 
 		register_t *retval)
 {
@@ -212,6 +239,7 @@ int sys_my_pipe(struct lwp *l, const struct sys_my_pipe_args *uap,
 	uint8_t smalls[5], nparts[2];
 	uint32_t bigs[4];
 
+	/* allocate my_pipe_op and my_pipe structs and initialize them */
 	pipe = malloc(sizeof(struct my_pipe), M_TEMP, M_WAITOK);
 	if (pipe == NULL)
 		return ENOMEM;
@@ -233,6 +261,7 @@ int sys_my_pipe(struct lwp *l, const struct sys_my_pipe_args *uap,
 	pipe->buf = pipe->cnt + 4;
 	pipe->pr_readers = 1;
 	pipe->pr_writers = 1;
+	/* check if shared memory is initialized and if not then initialize it */
 	init = bus_space_read_1(sharme.data_t, sharme.data_h, pipe->init); 
 	if (init == 0) {
 		smalls[0] = 1;
@@ -247,6 +276,7 @@ int sys_my_pipe(struct lwp *l, const struct sys_my_pipe_args *uap,
 		bigs[3] = 0;
 		write_region_4(pipe->len, bigs, 4);
 	}
+	/* increase reaaders and writters in pipe */
 	pipe_lock(pipe->lock);
 	read_region_1(pipe->nreaders, nparts, 2);
 	nparts[0]++;
@@ -256,14 +286,6 @@ int sys_my_pipe(struct lwp *l, const struct sys_my_pipe_args *uap,
 	ro->oper = 0;
 	wo->oper = 1;
 	ro->pipe = wo->pipe = pipe;
-
-	///* allocate my_pipe_data structs and initialize them */
-	//if ((rd = malloc(sizeof(struct my_pipe_data), M_TEMP, M_WAITOK)) == 
-	//	NULL)
-	//	return ENOMEM;
-	//if ((wd = malloc(sizeof(struct my_pipe_data), M_TEMP, M_WAITOK)) == 
-	//	NULL)
-	//	return ENOMEM;
 	/* allocate read end of pipe */
 	error = fd_allocfile(&rf, &descr);
 	if (error)
@@ -306,33 +328,28 @@ malloc_fail:
 	return ENOMEM;
 }
 
+/*
+ * Spinlock for pipe 
+ */
 void pipe_lock(bus_size_t lock)
 {
-	printf("Give me the lock\n");
-	int i = 0;
-	while(__sync_val_compare_and_swap((uint8_t *)sharme.data_b + lock, 0, 1) == 1) {
-		i++;
-		if(i%10 == 0)
-			printf("still here waiting\n");
-
-	//while (bus_space_read_1(sharme.data_t, sharme.data_h, 
-	//		sharme.data_s - 2) == 1)
+	while(__sync_val_compare_and_swap((uint8_t *)sharme.data_b + lock, 0, 1) == 1)
 		/* do nothing */; 
-	}
-	//bus_space_write_1(sharme.data_t, sharme.data_h, sharme.data_s - 2, 1);
-	printf("Got me the lock\n");
 	return;
 }
 
+/*
+ * Release the lock
+ */
 void pipe_unlock(bus_size_t lock) 
 {
-	printf("Release the lock\n");
-	//bus_space_write_1(sharme.data_t, sharme.data_h, sharme.data_s - 2, 0);
 	__sync_lock_release((uint8_t *)sharme.data_b + lock);
-	printf("Lock released\n");
 	return;
 }
 
+/*
+ * Read a region of bytes in bus (data is 1 byte)
+ */
 void read_region_1(bus_size_t offset, uint8_t *datap, bus_size_t count)
 {
 	int i;
@@ -343,6 +360,9 @@ void read_region_1(bus_size_t offset, uint8_t *datap, bus_size_t count)
 	return;
 }
 
+/*
+ * Read a region of bytes in bus (data is 4 byte)
+ */
 void read_region_4(bus_size_t offset, uint32_t *datap, bus_size_t count)
 {
 	int i;
@@ -353,6 +373,9 @@ void read_region_4(bus_size_t offset, uint32_t *datap, bus_size_t count)
 	return;
 }
 
+/*
+ * Write in a region of bytes in bus (data is 1 byte)
+ */
 void write_region_1(bus_size_t offset, uint8_t *datap, bus_size_t count)
 {
 	int i;
@@ -363,6 +386,9 @@ void write_region_1(bus_size_t offset, uint8_t *datap, bus_size_t count)
 	return;
 }
 
+/*
+ * Write in a region of bytes in bus (data is 4 byte)
+ */
 void write_region_4(bus_size_t offset, uint32_t *datap, bus_size_t count)
 {
 	int i;
