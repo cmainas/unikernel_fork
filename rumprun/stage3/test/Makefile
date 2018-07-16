@@ -3,7 +3,7 @@ BK = /path/to/rumprun-bake
 
 CFLAGS = -Wall
 
-TARGET = hw_generic
+TARGET = hw_generic_iv
 
 BINS = server-rumprun.bin client-rumprun.bin
 
