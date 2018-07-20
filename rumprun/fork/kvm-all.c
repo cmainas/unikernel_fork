@@ -131,6 +131,8 @@ static const KVMCapabilityInfo kvm_required_capabilites[] = {
     KVM_CAP_LAST_INFO
 };
 
+#define QEMU_BIN "/path/to/qemu-system-x86_64"
+
 void my_fork(void);
 
 int kvm_get_max_memslots(void)
@@ -1853,7 +1855,7 @@ void my_fork(void)
 	pid_t p = fork();
 	if (p == 0) {
 		/* child */
-		const char *argv[] = {"/home/xenus/unikernels/paixnidi/fork/qemu-2.11.2/x86_64-softmmu/qemu-system-x86_64", "-net", "none", "-enable-kvm", "-cpu", "host", "-m", "64", "-vga", "none", "-nographic", "-device", "ivshmem-plain,memdev=hostmem", "-object", "memory-backend-file,size=1M,share,mem-path=/dev/shm/ivshmem,id=hostmem", "-kernel", "server-rumprun.bin", (char *)0};
+		const char *argv[] = {QEMU_BIN, "-net", "none", "-enable-kvm", "-cpu", "host", "-m", "64", "-vga", "none", "-nographic", "-device", "ivshmem-plain,memdev=hostmem", "-object", "memory-backend-file,size=1M,share,mem-path=/dev/shm/ivshmem,id=hostmem", "-kernel", "server-rumprun.bin", (char *)0};
 		const char *envp[] = {(char *)0};
 		/* redirect output of child in a special file 
 		 * therefore child and parent will not fight over stdout */
