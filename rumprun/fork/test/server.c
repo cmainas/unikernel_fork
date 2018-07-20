@@ -5,6 +5,31 @@
 
 int main()
 {
+	int fd[2], n;
+	char buf[30], buf1[30];
+	if(my_pipe(fd) < 0)
+		perror("pipe");
+	printf("USERSPACE: fd: %d - %d\n", fd[0], fd[1]);
+	close(fd[1]);
+	printf("wait toread...\n");
+	n = read(fd[0], buf, 30);
+	if (n < 0)
+		perror("read:");
+	printf("USERSPACE: read %d bytes\n", n);
+	printf("USERSPACE: Got message: %s\n", buf);
+	n = read(fd[0], buf, 30);
+	if(n < 0)
+		perror("read");
+	printf("USERSPACE: read %d bytes\n", n);
+	printf("USERSPACE: Got message: %s\n", buf);
+	printf("wait toread...\n");
+	n = read(fd[0], buf1, 30);
+	if (n < 0)
+		perror("read:");
+	printf("USERSPACE: read %d bytes\n", n);
+	printf("USERSPACE: Got message: %s\n", buf1);
+	close(fd[0]);
+	return 0;
 	//int fd[2], n;
 	//char buf[30], buf1[30];
 	//if(my_pipe(fd) < 0)
@@ -30,6 +55,6 @@ int main()
 	//printf("USERSPACE: Got message: %s\n", buf1);
 	//close(fd[0]);
 	//close(fd[1]);
-	return 0;
+	//return 0;
 }
 

@@ -5,15 +5,41 @@
 
 int main()
 {
-	printf("userpcae\n");
-	int n = my_fork();
-	printf("returned: %d\n", n);
+	int fd[2], n;
+	char *buf = "Hello from another unikernel!\n";
+	if(my_pipe(fd) < 0)
+		perror("pipe");
+	printf("USERSPACE: fd: %d - %d\n", fd[0], fd[1]);
+	fflush(stdout);
+	n = my_fork();
+	printf("USERSPACE: fork returned: %d\n", n);
+	sleep(5);
+	close(fd[0]);
+	n = write(fd[1], buf, 30);
+	if(n < 0)
+		perror("write");
+	printf("USERSPACE: wrote %d bytes\n", n);
+	fflush(stdout);
+	buf[0] = 'S';
+	n = write(fd[1], buf, 30);
+	if (n < 0)
+		perror("write:");
+	printf("USERSPACE: wrote %d bytes\n", n);
+	buf[0] = 'Q';
+	n = write(fd[1], buf, 20);
+	if(n < 0)
+		perror("write");
+	printf("USERSPACE: wrote %d bytes\n", n);
+	close(fd[1]);
+	return 0;
 	//int fd[2], n;
 	//char *buf = "Hello from another unikernel!\n";
 	//if(my_pipe(fd) < 0)
 	//	perror("pipe");
 	//printf("USERSPACE: fd: %d - %d\n", fd[0], fd[1]);
 	//fflush(stdout);
+	//n = my_fork();
+	//printf("USERSPACE: fork returned: %d\n", n);
 	//n = write(fd[1], buf, 30);
 	//if(n < 0)
 	//	perror("write");
@@ -35,8 +61,7 @@ int main()
 	//fflush(stdout);
 	//close(fd[0]);
 	//close(fd[1]);
-	/* needs to wait a bit before halt */
-	return 0;
+	//return 0;
 }
 
 

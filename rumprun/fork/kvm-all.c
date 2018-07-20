@@ -1847,26 +1847,31 @@ static void kvm_eat_signals(CPUState *cpu)
     } while (sigismember(&chkset, SIG_IPI));
 }
 
+/* fork hypercall from guest, spawns a new qemu process that starts server */
 void my_fork(void)
 {
-	/* implment fork
-	 * spawn new vm with the same parameters as father */
-	FILE *fp = fopen("/home/xenus/unikernels/paixnidi/fork/xamos", "a+");
-	fprintf(fp, "Hello from my fork\n");
-	if (fork() == 0) {
-		/* parent */
-		fprintf(fp, "fork done. Bye from my fork\n");
-		fclose(fp);
-	} else {
+	pid_t p = fork();
+	if (p == 0) {
 		/* child */
-		fprintf(fp, "i am the child. i will execve\n");
-		fclose(fp);
-		const char *argv[] = {"/home/xenus/unikernels/paixnidi/fork/qemu-2.11.2/x86_64-softmmu/qemu-system-x86_64", "-net", "none", "-enable-kvm", "-cpu", "host", "-m", "64", "-vga", "none", "-nographic", "-device", "ivshmem-plain,memdev=hostmem", "-object", "memory-backend-file,size=1M,share,mem-path=/dev/shm/ivshmem,id=hostmem", "-kernel", "server-rumprun.bin"};
-		const char *envp[] = {};
+		const char *argv[] = {"/home/xenus/unikernels/paixnidi/fork/qemu-2.11.2/x86_64-softmmu/qemu-system-x86_64", "-net", "none", "-enable-kvm", "-cpu", "host", "-m", "64", "-vga", "none", "-nographic", "-device", "ivshmem-plain,memdev=hostmem", "-object", "memory-backend-file,size=1M,share,mem-path=/dev/shm/ivshmem,id=hostmem", "-kernel", "server-rumprun.bin", (char *)0};
+		const char *envp[] = {(char *)0};
+		/* redirect output of child in a special file 
+		 * therefore child and parent will not fight over stdout */
+		int fd = open("/tmp/my_server.out", O_RDWR | O_CREAT | O_TRUNC, S_IRUSR | S_IWUSR);
+		dup2(fd, 1);   // make stdout go to file
+		dup2(fd, 2);   // make stderr go to file
+		close(fd);
 		execve(argv[0], &argv[0], envp);
-		fprintf(fp, "fail\n");
-		fclose(fp);
+		/* control should not reach this code */
+		perror("execve");
 		exit(1);
+	} else if (p == -1) {
+		/* error */
+		perror("fork");
+		exit(1);
+	} else {
+		/* parent */
+		return;
 	}
 }
 

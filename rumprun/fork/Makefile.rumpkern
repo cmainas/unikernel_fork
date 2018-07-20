@@ -127,6 +127,7 @@ SRCS+=	init_sysctl_base.c	\
 	sys_module.c		\
 	sys_pipe.c		\
 	sys_my_fork.c		\
+	sys_my_pipe.c		\
 	sys_select.c		\
 	syscalls.c		\
 	uipc_sem.c

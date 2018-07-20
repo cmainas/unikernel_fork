@@ -76,6 +76,7 @@ extern sy_call_t sys_pipe2;
 extern sy_call_t sys_dup3;
 extern sy_call_t sys_kqueue1;
 extern sy_call_t sys_clock_nanosleep;
+extern sy_call_t sys_my_pipe;
 extern sy_call_t sys_my_fork;
 
 static const struct rump_onesyscall mysys[] = {
@@ -146,7 +147,8 @@ static const struct rump_onesyscall mysys[] = {
 	{ 454,	sys_dup3 },
 	{ 455,	sys_kqueue1 },
 	{ 477,	sys_clock_nanosleep },
-	{ 483,	sys_my_fork },
+	{ 483,	sys_my_pipe },
+	{ 484,	sys_my_fork },
 };
 
 RUMP_COMPONENT(RUMP_COMPONENT_SYSCALL)
