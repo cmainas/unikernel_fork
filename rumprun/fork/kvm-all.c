@@ -1957,16 +1957,10 @@ int kvm_cpu_exec(CPUState *cpu)
         switch (run->exit_reason) {
         case KVM_EXIT_IO:
             DPRINTF("handle_io\n");
-		FILE *fp = fopen("/tmp/mpla", "a+");
-		fprintf(fp, "hi: %x\n", run->io.port);
-		fclose(fp);
 	    if (run->io.port == 0xffdc && run->io.direction == KVM_EXIT_IO_IN ) {
 	//    if (run->io.port == 0xffdc && *(uint8_t *)((char *) (run) + 
 	//			    run->io.data_offset) == 77) {
 		    my_fork((uint8_t *)run + run->io.data_offset);
-		    FILE *fp1 = fopen("/tmp/mpla", "a+");
-		    fprintf(fp1, "hypercall\n");
-		    fclose(fp1);
 		    break;
 	    }
             /* Called outside BQL */
