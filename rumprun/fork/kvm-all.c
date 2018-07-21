@@ -133,7 +133,7 @@ static const KVMCapabilityInfo kvm_required_capabilites[] = {
 
 #define QEMU_BIN "/path/to/qemu-system-x86_64"
 
-void my_fork(void);
+void my_fork(void *data);
 
 int kvm_get_max_memslots(void)
 {
@@ -1850,9 +1850,10 @@ static void kvm_eat_signals(CPUState *cpu)
 }
 
 /* fork hypercall from guest, spawns a new qemu process that starts server */
-void my_fork(void)
+void my_fork(void *data)
 {
 	pid_t p = fork();
+	uint8_t *ptr = data;
 	if (p == 0) {
 		/* child */
 		const char *argv[] = {QEMU_BIN, "-net", "none", "-enable-kvm", "-cpu", "host", "-m", "64", "-vga", "none", "-nographic", "-device", "ivshmem-plain,memdev=hostmem", "-object", "memory-backend-file,size=1M,share,mem-path=/dev/shm/ivshmem,id=hostmem", "-kernel", "server-rumprun.bin", (char *)0};
@@ -1873,6 +1874,7 @@ void my_fork(void)
 		exit(1);
 	} else {
 		/* parent */
+		stl_p(ptr,p);
 		return;
 	}
 }
@@ -1955,9 +1957,16 @@ int kvm_cpu_exec(CPUState *cpu)
         switch (run->exit_reason) {
         case KVM_EXIT_IO:
             DPRINTF("handle_io\n");
-	    if (run->io.port == 0xffdc && *(uint8_t *)((char *) (run) + 
-				    run->io.data_offset) == 77) {
-		    my_fork();
+		FILE *fp = fopen("/tmp/mpla", "a+");
+		fprintf(fp, "hi: %x\n", run->io.port);
+		fclose(fp);
+	    if (run->io.port == 0xffdc && run->io.direction == KVM_EXIT_IO_IN ) {
+	//    if (run->io.port == 0xffdc && *(uint8_t *)((char *) (run) + 
+	//			    run->io.data_offset) == 77) {
+		    my_fork((uint8_t *)run + run->io.data_offset);
+		    FILE *fp1 = fopen("/tmp/mpla", "a+");
+		    fprintf(fp1, "hypercall\n");
+		    fclose(fp1);
 		    break;
 	    }
             /* Called outside BQL */
