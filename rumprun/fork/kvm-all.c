@@ -41,6 +41,14 @@
 
 #include "hw/boards.h"
 
+#include "migration/snapshot.h"
+#include "migration/migration.h"
+#include "migration/fd.h"
+#include "migration/channel.h"
+#include "io/channel-util.h"
+#include "migration/exec.h"
+#include "qemu/cutils.h"
+//#include <fcntl.h>
 /* This check must be after config-host.h is included */
 #ifdef CONFIG_EVENTFD
 #include <sys/eventfd.h>
@@ -131,9 +139,10 @@ static const KVMCapabilityInfo kvm_required_capabilites[] = {
     KVM_CAP_LAST_INFO
 };
 
-#define QEMU_BIN "/path/to/qemu-system-x86_64"
+#define QEMU_BIN "/home/xenus/unikernels/paixnidi/fork/qemu-2.11.2/x86_64-softmmu/qemu-system-x86_64"
 
 void my_fork(void *data);
+void my_resum(void *data);
 
 int kvm_get_max_memslots(void)
 {
@@ -1849,14 +1858,104 @@ static void kvm_eat_signals(CPUState *cpu)
     } while (sigismember(&chkset, SIG_IPI));
 }
 
+static gboolean fd_accept_incoming_migration(QIOChannel *ioc, 
+		GIOCondition condition, gpointer opaque)
+{
+	migration_channel_process_incoming(ioc);
+	object_unref(OBJECT(ioc));
+	return G_SOURCE_REMOVE;
+}
+
+void my_resum(void *data)
+{
+	FILE *fp = fopen("/tmp/posa", "w+");
+	fprintf(fp, "to xw parakanei\n");
+	Error *errp = NULL;
+	QIOChannel *ioc;
+	int fd;
+	static char temp_file[] = "/tmp/migrate.XXXXXX";
+	fd = open (temp_file, O_RDONLY | O_BINARY);
+	//fd = strtol("/tmp/migrate.XXXXXX", NULL, 0);
+	ioc = qio_channel_new_fd(fd, &errp);
+	if (!ioc) {
+		close(fd);
+		return;
+	}
+	qio_channel_set_name(QIO_CHANNEL(ioc), "migration-fd-incoming");
+	qio_channel_add_watch(ioc,
+			G_IO_IN,
+			fd_accept_incoming_migration,
+			NULL,
+			NULL);
+	fprintf(fp, "migration completed\n");
+	fclose(fp);
+}
+
 /* fork hypercall from guest, spawns a new qemu process that starts server */
 void my_fork(void *data)
 {
-	pid_t p = fork();
 	uint8_t *ptr = data;
+	//pid_t p = 0;
+	pid_t p = 0;
+
+	stl_p(ptr,p);
+	const char uri[] = "exec:gzip -c > MYSTATEFILE.gz", *pa;
+	Error *errp = NULL;
+	MigrationState *s;
+	s = migrate_init();
+	//FILE *fp = fopen("/tmp/xamos", "w+");
+	//fprintf(fp, "eleos\n");
+	//if (runstate_is_running())
+	//	fprintf(fp, "ma trexw\n");
+	//else
+	//	fprintf(fp, "den trexw\n");
+	//fclose(fp);
+	strstart(uri, "exec:", &pa);
+	exec_start_outgoing_migration(s, pa, &errp);
+	FILE *fp = fopen("/tmp/xamos11", "w+");
+	//if(s->migration_thread_running == true) 
+	//	qemu_thread_join(&s->thread);
+	if(s->migration_thread_running == true) 
+		fprintf(fp, "trexeiiiii\n");
+	else
+		fprintf(fp, "den trexeiiiii\n");
+	fclose(fp);
+	/* migration code */
+	//static char temp_file[] = "/tmp/migrate.XXXXXX";
+	//Error *errp = NULL;
+	//MigrationState *s = migrate_get_current();
+	//s = migrate_init();
+	//FILE *fp = fopen("/tmp/xamos", "w+");
+	//fprintf(fp, "eleos\n");
+	//if (runstate_is_running())
+	//	fprintf(fp, "ma trexw\n");
+	//else
+	//	fprintf(fp, "den trexw\n");
+	//fclose(fp);
+	//QIOChannel *ioc;
+	////int fd = mkstemp(temp_file);
+	//int fd = open (temp_file, O_RDWR | O_CREAT | O_EXCL | O_BINARY, S_IREAD | S_IWRITE);
+	//int fd_dp = dup(fd);
+	//ioc = qio_channel_new_fd(fd_dp, &errp);
+	//if (!ioc) {
+	//	close(fd);
+	//	exit(1);
+	//}
+	//qio_channel_set_name(QIO_CHANNEL(ioc), "my-migration-fd-outgoing");
+	//migration_channel_connect(s, ioc, NULL);
+	//object_unref(OBJECT(ioc));
+	/* prepei na allaksw to running state giati to migration kanei pause
+	 * to vm */
+
+	//fd_start_outgoing_migration(s, "/tmp/migration", &local_err);
+	//fp = fopen("/tmp/xamos", "w+");
+	//fprintf(fp, "eleos 2\n");
+	//fclose(fp);
+	p = fork();
+	//p = 2;
 	if (p == 0) {
 		/* child */
-		const char *argv[] = {QEMU_BIN, "-net", "none", "-enable-kvm", "-cpu", "host", "-m", "64", "-vga", "none", "-nographic", "-device", "ivshmem-plain,memdev=hostmem", "-object", "memory-backend-file,size=1M,share,mem-path=/dev/shm/ivshmem,id=hostmem", "-kernel", "server-rumprun.bin", (char *)0};
+		const char *argv[] = {QEMU_BIN, "-net", "none", "-enable-kvm", "-cpu", "host", "-m", "64", "-vga", "none", "-nographic", "-device", "ivshmem-plain,memdev=hostmem,master=on", "-object", "memory-backend-file,size=1M,share,mem-path=/dev/shm/ivshmem,id=hostmem", "-kernel", "server-rumprun.bin", "-incoming", "exec: gzip -c -d MYSTATEFILE.gz",(char *)0};
 		const char *envp[] = {(char *)0};
 		/* redirect output of child in a special file 
 		 * therefore child and parent will not fight over stdout */
@@ -1894,6 +1993,7 @@ int kvm_cpu_exec(CPUState *cpu)
     qemu_mutex_unlock_iothread();
     cpu_exec_start(cpu);
 
+    int plzzzz = 0;
     do {
         MemTxAttrs attrs;
 
@@ -1918,6 +2018,13 @@ int kvm_cpu_exec(CPUState *cpu)
          */
         smp_rmb();
 
+
+	if(plzzzz == 1) {
+		FILE *fp = fopen("/tmp/plzzz", "w+");
+		fprintf(fp, "as einai auto...\n");
+		fclose(fp);
+	}
+		
         run_ret = kvm_vcpu_ioctl(cpu, KVM_RUN, 0);
 
         attrs = kvm_arch_post_run(cpu, run);
@@ -1953,14 +2060,30 @@ int kvm_cpu_exec(CPUState *cpu)
             break;
         }
 
+	FILE *fp;
+	fp = fopen("/tmp/mpla", "a+");
+	fprintf(fp, "exit reason %x\n", run->exit_reason);
+	fclose(fp);
         trace_kvm_run_exit(cpu->cpu_index, run->exit_reason);
         switch (run->exit_reason) {
         case KVM_EXIT_IO:
+		fp = fopen("/tmp/mpla", "a+");
+		fprintf(fp, "io port %x\n", run->io.port);
+		fclose(fp);
             DPRINTF("handle_io\n");
 	    if (run->io.port == 0xffdc && run->io.direction == KVM_EXIT_IO_IN ) {
 	//    if (run->io.port == 0xffdc && *(uint8_t *)((char *) (run) + 
 	//			    run->io.data_offset) == 77) {
 		    my_fork((uint8_t *)run + run->io.data_offset);
+		    ret = 0;
+		    break;
+	    }
+	    if (run->io.port == 0xf7dc && run->io.direction == KVM_EXIT_IO_IN ) {
+	//    if (run->io.port == 0xffdc && *(uint8_t *)((char *) (run) + 
+	//			    run->io.data_offset) == 77) {
+		    my_resum((uint8_t *)run + run->io.data_offset);
+		    ret = 0;
+		    plzzzz = 1;
 		    break;
 	    }
             /* Called outside BQL */
