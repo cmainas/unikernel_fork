@@ -5,25 +5,19 @@ CFLAGS = -Wall
 
 TARGET = hw_generic_iv
 
-BINS = server-rumprun.bin client-rumprun.bin
+BINS = test-rumprun.bin 
 
 all: $(BINS)
 
-server-rumprun.bin: server-rumprun
-	$(BK) $(TARGET) server-rumprun.bin server-rumprun
+test-rumprun.bin: test-rumprun
+	$(BK) $(TARGET) test-rumprun.bin test-rumprun
 
-client-rumprun.bin: client-rumprun
-	$(BK) $(TARGET) client-rumprun.bin client-rumprun
-
-server-rumprun: server.c
-	$(CC) $(CFLAGS) -o server-rumprun server.c
-
-client-rumprun: client.c 
-	$(CC) $(CFLAGS) -o client-rumprun client.c
+test-rumprun: test.c
+	$(CC) $(CFLAGS) -o test-rumprun test.c
 
 dist_clean: clean
 	rm $(BINS) 
 
 clean:
-	rm -f *.o server-rumprun client-rumprun
+	rm -f *.o test-rumprun 
 

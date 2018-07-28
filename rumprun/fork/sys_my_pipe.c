@@ -13,13 +13,6 @@ int my_pipe_read(file_t *fp, off_t *offset, struct uio *uio, kauth_cred_t cred,
 		int flags);
 int my_pipe_write(file_t *fp, off_t *offset, struct uio *uio, kauth_cred_t cred,
 		int flags);
-void pipe_lock(bus_size_t lock);
-void pipe_unlock(bus_size_t lock);
-void read_region_1(bus_size_t offset, uint8_t *datap, bus_size_t count);
-void read_region_4(bus_size_t offset, uint32_t *datap, bus_size_t count);
-void write_region_1(bus_size_t offset, uint8_t *datap, bus_size_t count);
-void write_region_4(bus_size_t offset, uint32_t *datap, bus_size_t count);
-
 
 const struct fileops my_pipeops = {
 	.fo_read = my_pipe_read,
@@ -283,6 +276,7 @@ int sys_my_pipe(struct lwp *l, const struct sys_my_pipe_args *uap,
 	nparts[1]++;
 	write_region_1(pipe->nreaders, nparts, 2);
 	pipe_unlock(pipe->lock);
+	sharme.pipeops = &my_pipeops;
 	ro->oper = 0;
 	wo->oper = 1;
 	ro->pipe = wo->pipe = pipe;
