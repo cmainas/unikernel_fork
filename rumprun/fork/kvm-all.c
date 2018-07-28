@@ -148,7 +148,7 @@ static const KVMCapabilityInfo kvm_required_capabilites[] = {
     KVM_CAP_LAST_INFO
 };
 
-#define QEMU_BIN "/home/xenus/unikernels/paixnidi/fork/qemu-2.11.2/x86_64-softmmu/qemu-system-x86_64"
+#define QEMU_BIN "/path/to/qemu-system-x86_64"
 
 void my_fork(void *data, bool *check);
 void my_start_migration(void *data);
