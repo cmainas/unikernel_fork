@@ -148,8 +148,7 @@ static const KVMCapabilityInfo kvm_required_capabilites[] = {
     KVM_CAP_LAST_INFO
 };
 
-#define QEMU_BIN "/path/to/qemu-system-x86_64"
-
+char **execve_argv(void);
 void my_fork(void *data, bool *check);
 void my_start_migration(void *data);
 void my_exec_start_outgoing_migration(MigrationState *s, const char *command, Error **errp);
@@ -2303,6 +2302,24 @@ void my_start_migration(void *data)
 	my_exec_start_outgoing_migration(s, pa, &errp);
 }
 
+/* 
+ * a helper function that copies argv to a new array and adds -incoming option
+ */
+extern char **my_argv;
+extern int my_argc;
+char **execve_argv(void)
+{
+	// allocate memory and copy strings
+	int i;
+	char** new_argv = g_malloc((my_argc + 3) * sizeof(*new_argv));
+    	for(i = 0; i < my_argc; i++)
+    	    	new_argv[i] = g_strdup(my_argv[i]);
+    	new_argv[my_argc] = g_strdup("-incoming");
+    	new_argv[my_argc + 1] = g_strdup("exec: cat /tmp/vm_migration.out");
+    	new_argv[my_argc + 2] = NULL;
+	return new_argv;
+}
+
 /* fork hypercall from guest, checks if migration has been completed and then 
  * spawns a new vm that uses the migration data that have been generated
  * */
@@ -2338,8 +2355,8 @@ void my_fork(void *data, bool *check)
 	p = fork();
 	if (p == 0) {
 		/* child */
-		const char *argv[] = {QEMU_BIN, "-net", "none", "-enable-kvm", "-cpu", "host", "-m", "64", "-vga", "none", "-nographic", "-device", "ivshmem-plain,memdev=hostmem,master=on", "-object", "memory-backend-file,size=1M,share,mem-path=/dev/shm/ivshmem,id=hostmem", "-kernel", "test-rumprun.bin", "-incoming", "exec: cat /tmp/vm_migration.out", NULL};
-		const char *envp[] = {NULL};
+		char *envp[] = {NULL};
+		char **argv1;
 		/* redirect output of child in a special file 
 		 * therefore child and parent will not fight over stdout */
 		int fd = open("/tmp/my_server.out", O_RDWR | O_CREAT | O_TRUNC, S_IRUSR | S_IWUSR);
@@ -2348,7 +2365,8 @@ void my_fork(void *data, bool *check)
 		/* make stderr go to file */
 		dup2(fd, 2);  
 		close(fd);
-		execve(argv[0], argv, envp);
+		argv1 = execve_argv();
+		execve(argv1[0], argv1, envp);
 		/* control should not reach this code */
 		perror("execve");
 		exit(1);

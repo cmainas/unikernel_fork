@@ -45,6 +45,8 @@ then
 	echo 
 	echo "----------------- build qemu -----------------"
 	echo 
+	echo "cp vl.c ${QEMU_DIR}/vl.c"
+	cp vl.c ${QEMU_DIR}/vl.c
 	echo "cp kvm-all.c ${QEMU_DIR}/accel/kvm/kvm-all.c"
 	cp kvm-all.c ${QEMU_DIR}/accel/kvm/kvm-all.c
 	DIR=${PWD}
