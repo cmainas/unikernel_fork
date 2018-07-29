@@ -42,6 +42,8 @@ int my_pipe_close(file_t *fp)
 	if (nparts[0] == 0 && nparts[1] == 0) {
 		memset((void *)sharme.data_b, 0, 20 + MY_PIPE_BUF_SIZE);
 		printf("clear all\n");
+		bus_space_write_1(sharme.data_t, sharme.data_h,
+				sharme.data_s - 1, 0);
 	}
 	/* decrease number of writers or readers in pipe from current process */
 	if (op->oper == 0) 
