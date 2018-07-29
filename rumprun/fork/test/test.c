@@ -34,6 +34,7 @@ void client(int fd[2])
 {
 	int n;
 	char *buf = "Hello from another unikernel!\n";
+	close(fd[0]);
 	n = write(fd[1], buf, 30);
 	if(n < 0)
 		perror("write");
