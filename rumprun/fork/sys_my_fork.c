@@ -3,6 +3,7 @@
 #include <sys/filedesc.h>
 #include <sys/file.h>
 #include <sys/proc.h>
+#include <sys/bus.h>
 
 #define VMCALL_ID 100
 
@@ -25,6 +26,7 @@ static void increase_pipe_rw(bus_size_t n, bus_size_t lock)
 	pipe_lock(lock);
 	a = bus_space_read_1(sharme.data_t, sharme.data_h, n);
 	a++;
+	printf(" increase: %d\n", a);
 	bus_space_write_1(sharme.data_t, sharme.data_h, n, a);
 	pipe_unlock(lock);
 }
@@ -39,13 +41,15 @@ int sys_my_fork(struct lwp *l, const void *v, register_t *retval)
 	size_t fd;
 	filedesc_t *fdp = l->l_fd;
 	dt = fdp->fd_dt;
+	int flag = 0;
 	for (fd = 0; fd < dt->dt_nfiles; fd++) {
 		if ((ff = dt->dt_ff[fd]) == NULL)
 			continue;
 		if ((fp = ff->ff_file) == NULL)
 			continue;
 		if (fp->f_ops == sharme.pipeops) {
-			printf("hi pipe\n");
+			/* use of ivshmem */
+			flag = 1;
 			struct my_pipe_op *pipe_op = fp->f_data;
 			if (pipe_op->oper == 0)
 				/* increase readers by one */
@@ -88,11 +92,21 @@ int sys_my_fork(struct lwp *l, const void *v, register_t *retval)
 	/* when migration is finished child will get 2, 
 	 * while parent will get 1
 	 */
-	if (ret == 1)
+	if (ret == 1) {
 		/* parent return process id of new qeemu instance */
 		*retval = inl(0xffdc);
-	else 
+		if (flag == 1) {
+			while( bus_space_read_1(sharme.data_t, sharme.data_h, 
+						sharme.data_s - 1) != 77)
+				/* wait for the child to start */;
+		}
+	} else  {
 		/* child return 0 */
 		*retval = 0;
+		if (flag == 1) {
+			bus_space_write_1(sharme.data_t, sharme.data_h, 
+					sharme.data_s - 1, 77);
+		}
+	}
 	return 0;
 }

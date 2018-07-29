@@ -29,29 +29,32 @@ int my_pipe_close(file_t *fp)
 	struct my_pipe *pipe = op->pipe; 
 	uint8_t nparts[2];
 	fp->f_data = NULL;
-	/* free my_pipe_op struct of process */
-	free(op, M_TEMP);
 	/* decrease number of writers or readers in pipe */
 	pipe_lock(pipe->lock);
 	read_region_1(pipe->nreaders, nparts, 2);
-	if(op->oper == 0) 
+	if (op->oper == 0) 
 		nparts[0]--;
-	else if(op->oper == 1)
+	else if (op->oper == 1)
 		nparts[1]--;
 	write_region_1(pipe->nreaders, nparts, 2);
 	pipe_unlock(pipe->lock);
+	/* clean used shared memory if no readers or writers exist */
+	if (nparts[0] == 0 && nparts[1] == 0) {
+		memset((void *)sharme.data_b, 0, 20 + MY_PIPE_BUF_SIZE);
+		printf("clear all\n");
+	}
 	/* decrease number of writers or readers in pipe from current process */
-	if(op->oper == 0) 
+	if (op->oper == 0) 
 		pipe->pr_readers--;
 	else if(op->oper == 1)
 		pipe->pr_writers--;
 	/* free my_pipe struct if no readers and writers exist */
-	if(pipe->pr_readers == 0 && pipe->pr_writers == 0) 
+	if (pipe->pr_readers == 0 && pipe->pr_writers == 0) 
 		free(pipe, M_TEMP);
-	/* clean used shared memory if no readers or writers exist */
-	if(nparts[0] == 0 && nparts[1] == 0) 
-		memset((void *)sharme.data_b, 0, 20 + MY_PIPE_BUF_SIZE);
-	return 0; /*this always succeeds */
+	/* free my_pipe_op struct of process */
+	free(op, M_TEMP);
+	/* this always succeeds */
+	return 0; 
 }
 
 /*
