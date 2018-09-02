@@ -13,7 +13,9 @@
 	για το λειτουργικό σύστημα στο οποίο τρέχουν αυτές οι εφαρμογές. 
 	
 Μία νεότερη τάση για την υποστήριξη του cloud computing είναι τα
-	containers, τα οποία όμως παρουσιάζουν αρκετά σημαντικά ζητήματα που
+	containers, που προσφέρουν ελαφρύτερη εικονικοποίηση με γρηγορους
+	χρόνους εκτέλεσης, μικρή κατανάλωση μνήμης και άλλα πλεονεκτήματα. Από
+	την άλλη, παρουσιάζουν αρκετά σημαντικά ζητήματα που
 	αφορούν την ασφάλεια. Ένα από τα ζητήματα αυτά είναι, εκείνο της
 	απομόνωσης το οποίο αναγκάζει σε αρκετές περιπτώσεις να οδηγεί στη χρήση
 	εικονικών μηχανών για τη φιλοξενία των containers, χάνοντας αρκετά από
@@ -26,14 +28,16 @@
 	κομμάτι του λειτουργικού συστήματος χρειάζεται η εφαρμογή για να
 	λειτουργήσει η διεργασία (drivers, βιβλιοθήκες, κ.λ.π.), ενοποιημένα 
 	σαν ένα	αυτόνομο πρόγραμμα που μπορεί να τρέξει ως εικονική μηχανή.
+	Οι unikernels καταφέρνουν να έχουν γρήγορους χρόνους εκκίνησης και μικρή
+	κατανάλωση μνήμης, χωρίς να θυσιάζεται η ασφάλεια
 	Εν τούτοις, ένα πρόβλημα είναι ότι οι unikernels υποστηρίζουν μία και
-	μόνο διεργασία, με αποτέλεσμα να μην μπορούν εφαρμογές υλοποιημένες για
-	τα πλήρη λειτουργικά συστήματα να εκτελεστούν σε unikernels. 
+	μόνο διεργασία, με αποτέλεσμα να μην μπορούν εφαρμογές με παραπάνω από
+	μία διεργασίες να εκτελεστούν σε unikernels. 
 
 Σκοπός, λοιπόν, αυτής της εργασίας είναι η υλοποίηση ενός μηχανισμού που θα
 	επιτρέπει σε εφαρμογές με περισσότερες από μία διεργασίες να μπορούν να
 	εκτελεστούν και σε unikernels. Επιπλέον, υλοποιείται και ένας απλός
-	μηχανισμός για διαδιεργασιακή επικοινωνία, στα πρότυπα του pipe. 
+	μηχανισμός για επικοινωνία μεταξύ των εικονικών μηχανών, στα πρότυπα του pipe. 
 \vspace{2ex}
 
 Λέξεις-Κλειδιά: εικονικοποίηση, εικονικές μηχανές, ενδοεπικοινωνία εικονικών μηχανών, unikernel, kvm, QEMU
@@ -42,6 +46,39 @@
 \renewcommand{\abstractname}{Abstract}
 
 \begin{abstract}
-	Abstract
+In recent years cloud computing is one important chapter of modern commputer
+	science. The main technology used in order to support cloud computing is
+	virtualization. Virtualization makes possible for a physical machine to
+	host many virtual machines, each one of which is a self-sufficient
+	computer. However, virtual machines are often used to execute a single
+	application. As a result, resources are devoted to actions that are not
+	needed by the application, but they are necessary for the operating
+	system in which the applications run.
+
+An another technology to support cloud computing is the containers which offer
+	lightweight virtualization, fast instantiation times, small per-instance
+	memory footprints among other features. On the other hand, containers
+	have several important security issues. Isolation is one of these issues
+	, which in several cases leads to the use of virtual machines to host
+	the containers, losing several of their advantages.
+
+A further approach in cloud computing is unikernerls. Unikernels are
+	specialised, single-address-space machine images constructed by using
+	library operating systems and are specialised for one application. In
+	somewhat simplified terms, unikernels consist of the application's
+	source code and the parts of an opperating system that are needed from
+	the proccess to run (drivers, libraries, etc.) consolidated as a
+	stand-alone virtual machine. The Unikernels manage to have fast
+	instantiation times, small memory footprints, without sacrificing
+	security. However, one of the problems of unikernels is that they are
+	single-proccess and as a result multi-proccess applcations are not able
+	to run on unikernels. 
+
+The purpose of this thesis is to implement a mechanism that will enable the
+	execution of multi-proccess applications on unikernels. Furthermore, a
+	pipe-like mechanism for inter-vm communication is impemented.
+\vspace{2ex}
+
+Keywords: virtualization, virtual machines, inter-vm communication, unikernel, kvm, QEMU
 \end{abstract}
 
