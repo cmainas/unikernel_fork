@@ -1,21 +1,46 @@
 \documentclass[12pt, twoside, a4paper]{report}
+\usepackage[bindingoffset=2cm,centering,includeheadfoot,margin=2.8cm]{geometry}
 \usepackage[cm-default]{fontspec}
+\setromanfont{FreeSerif}
 \usepackage{xunicode}
+\usepackage{indentfirst}
 \usepackage{xltxtra}
+\usepackage{xgreek}
+%%\usepackage{listings}
+%%\usepackage{caption}
+%%\usepackage{cite}
+%%\usepackage{float}
+%%\usepackage{amsmath}
+%%\usepackage{graphicx}
+%%\usepackage{algorithmicx}
+%%\usepackage{array}
+%%\usepackage{tabularx}
+%%\usepackage{subcaption}
+%%\usepackage{comment}
+%%\usepackage{hyphenat}
+
 \setmainfont[Mapping=tex-text]{DejaVu Serif}
+\setmonofont[Mapping=tex-text]{DejaVu Sans Mono}
+
+%%\captionsetup[lstlisting]{labelfont=bf,textfont=normalfont}
+%%\captionsetup[figure]{labelfont=bf,textfont=normalfont}
+%%\captionsetup[table]{labelfont=bf,textfont=normalfont}
+%%\lstset{basicstyle=\footnotesize\ttfamily}
+
+\setcounter{secnumdepth}{5}
 \pagestyle{headings}
 \pagestyle{empty}
-\usepackage{indentfirst}
 %%\usepackage[dvips]{graphicx}
+
 \begin{document}
 \title{
 \vspace{-6ex}
 \begin{center}
 \includegraphics[scale=1]{pyrforos.eps}
 \end{center}
-\Large{Ε}\large{ΘΝΙΚΌ}
-\Large{Μ}\large{ΕΤΣΌΒΙΟ}
-\Large{Π}\large{ΟΛΥΤΕΧΝΕΊΟ} \\
+\Large{Ε}\large{ΘΝΙΚO}
+\Large{Μ}\large{ΕΤΣOΒΙΟ}
+\Large{Π}\large{ΟΛΥΤΕΧΝΕIΟ} \\
 \normalsize{Τ}\small{ΜΉΜΑ}
 \normalsize{H}\small{ΛΕΚΤΡΟΛΟΓΩΝ}
 \normalsize{M}\small{ΗΧΑΝΙΚΩΝ}
@@ -59,11 +84,11 @@
 \newpage
 \includegraphics{pyrforos.eps}
 \noindent
-\parbox[b]{0.6\textwidth} {\textbf{
+\parbox[b]{0.7\textwidth} {\textbf{
 \noindent
-\normalsize{Ε}\small{ΘΝΙΚΌ}
-\normalsize{Μ}\small{ΕΤΣΌΒΙΟ}
-\normalsize{Π}\small{ΟΛΥΤΕΧΝΕΊΟ}} \\
+\normalsize{ΕΘΝΙΚΌ}
+\normalsize{ΜΕΤΣΌΒΙΟ}
+\normalsize{ΠΟΛΥΤΕΧΝΕΊΟ}} \\
 \small
 TMHMA
 ΗΛΕΚΤΡΟΛΟΓΩΝ
@@ -149,5 +174,18 @@ TMHMA
 \noindent
 \copyright \hspace{1em}(Εισάγετε έτος έκδοσης) Εθνικό Μετσόβιο Πολυτεχνείο.
 All rights reserved.
+
+\include{abstract}
+
+\newpage
+\thispagestyle{empty}
+\mbox{}
+\newpage
+
+\tableofcontents
+\newpage
+\listoffigures
+%%\numberwithin{lstlisting}{chapter}
+%%\numberwithin{figure}{chapter}
 \end{document}
 

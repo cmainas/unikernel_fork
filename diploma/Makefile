@@ -1,4 +1,4 @@
-diploma.pdf: diploma.tex 
+diploma.pdf: diploma.tex abstract.tex
 	xelatex diploma.tex
 
 clean: 
