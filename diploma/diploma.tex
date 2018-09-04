@@ -8,7 +8,7 @@
 \usepackage{xgreek}
 %%\usepackage{listings}
 %%\usepackage{caption}
-%%\usepackage{cite}
+\usepackage{cite}
 %%\usepackage{float}
 %%\usepackage{amsmath}
 %%\usepackage{graphicx}
@@ -17,7 +17,7 @@
 %%\usepackage{tabularx}
 %%\usepackage{subcaption}
 %%\usepackage{comment}
-%%\usepackage{hyphenat}
+\usepackage{hyphenat}
 
 \setmainfont[Mapping=tex-text]{DejaVu Serif}
 \setmonofont[Mapping=tex-text]{DejaVu Sans Mono}
@@ -31,6 +31,11 @@
 \pagestyle{headings}
 \pagestyle{empty}
 %%\usepackage[dvips]{graphicx}
+\usepackage{hyperref}
+\hypersetup{
+    colorlinks=true, %set true if you want colored links
+    linkcolor=black,  %choose some color if you want links to stand out
+}
 
 \begin{document}
 \title{
@@ -182,10 +187,24 @@ All rights reserved.
 \mbox{}
 \newpage
 
+\setcounter{page}{1}
 \tableofcontents
 \newpage
 \listoffigures
 %%\numberwithin{lstlisting}{chapter}
 %%\numberwithin{figure}{chapter}
+
+\include{chapter1}
+
+\include{chapter2}
+
+\include{chapter3}
+
+\include{chapter4}
+
+mpla ~\cite{gao2017containerleaks}
+
+\bibliographystyle{plain}
+\bibliography{ref}{}
 \end{document}
 
