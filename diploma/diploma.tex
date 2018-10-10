@@ -28,21 +28,23 @@
 %%\lstset{basicstyle=\footnotesize\ttfamily}
 
 \setcounter{secnumdepth}{5}
-\pagestyle{headings}
-\pagestyle{empty}
+%%\pagestyle{headings}
 %%\usepackage[dvips]{graphicx}
 \usepackage{hyperref}
-\hypersetup{
-    colorlinks=true, %set true if you want colored links
-    linkcolor=black,  %choose some color if you want links to stand out
-}
+%%\hypersetup{
+%%    colorlinks=true, %set true if you want colored links
+%%    linkcolor=black,  %choose some color if you want links to stand out
+%%}
 
 \begin{document}
-\title{
-\vspace{-6ex}
+%%\title{
+\addtolength{\topmargin}{-0.5in}
+\thispagestyle{empty}
+\vspace{-8ex}
 \begin{center}
-\includegraphics[scale=1]{pyrforos.eps}
+\includegraphics[scale=1]{figures/pyrforos.eps}
 \end{center}
+\begin{center}
 \Large{Ε}\large{ΘΝΙΚO}
 \Large{Μ}\large{ΕΤΣOΒΙΟ}
 \Large{Π}\large{ΟΛΥΤΕΧΝΕIΟ} \\
@@ -55,6 +57,8 @@
 \vspace{2ex}
 -ΕΙΣΑΓΕΤΕ ΤΟΝ ΤΟΜΕΑ- \\
 -ΕΙΣΑΓΕΤΕ ΤΟ ΕΡΓΑΣΤΗΡΙΟ- \\
+\end{center}
+\begin{center}
 \vspace{8ex}
 \large \textbf{-Εισάγετε τον τίτλο της διπλωματικής εργασίας-} \\
 \vspace{10ex}
@@ -63,31 +67,39 @@
 \vspace{2ex}
 \normalsize
 -Εισάγετε το σωστό άρθρο (της/του/των)- \\
+\end{center}
 \vspace{2ex}
+\begin{center}
 \parbox[c]{0.4\textwidth} { \center\textbf{
 -Εισάγετε το όνομα, αρχικό πατρώνυμου και επώνυμο των συγγραφέων- }}
 \parbox[c]{0.4\textwidth} { \center\textbf{
 	-another author, whose name is here- }}
 \vspace{10ex}
-\flushleft
+\end{center}
+%%\flushleft
 \begin{tabbing}
 	\textbf{Επιβλέπων}: \= -Εισάγετε το όνομα, αρχικό πατρώνυμου
 				και επίθετο- \\
 			    \> -Εισάγετε τον τίτλο του επιβλέποντα-
 \end{tabbing}
-}
-\date{
+%%}
+%%\date{
+\begin{center}
 \normalsize
-Αθήνα, -Εισάγετε το μήνα και το έτος κατάθεσης της εργασίας-}
+Αθήνα, -Εισάγετε το μήνα και το έτος κατάθεσης της εργασίας-
+%%}
+\end{center}
 
-\maketitle
+%%\maketitle
 \newpage
+\thispagestyle{empty}
 \hspace{10pt}
 %\tiny
 %(this page is left intentionally blanc)
 %\normalsize
 \newpage
-\includegraphics{pyrforos.eps}
+\thispagestyle{empty}
+\includegraphics[scale=1.1]{figures/pyrforos.eps}
 \noindent
 \parbox[b]{0.7\textwidth} {\textbf{
 \noindent
@@ -106,9 +118,9 @@ TMHMA
 }
 
 \begin{center}
-\vspace{8ex}
+\vspace{7ex}
 \large \textbf{-Εισάγετε τον τίτλο της διπλωματικής εργασίας-} \\
-\vspace{10ex}
+\vspace{8ex}
 \large
 ΔΙΠΛΩΜΑΤΙΚΗ ΕΡΓΑΣΙΑ\\
 \vspace{2ex}
@@ -117,10 +129,10 @@ TMHMA
 \vspace{2ex}
 \parbox[c]{0.4\textwidth} { \center\textbf{
 -Εισάγετε το όνομα, αρχικό πατρώνυμου και επώνυμο των συγγραφέων- }}
-\parbox[c]{0.4\textwidth} { \center\textbf{
-	-another author, whose name is here- }}
+%%\parbox[c]{0.4\textwidth} { \center\textbf{
+%%	-another author, whose name is here- }}
 \vspace{10ex}
-\flushleft
+%%\flushleft
 \begin{tabbing}
 	\textbf{Επιβλέπων}: \= -Εισάγετε το όνομα, αρχικό πατρώνυμου
 				και επίθετο- \\
@@ -154,6 +166,7 @@ TMHMA
 \noindent
 Αθήνα, (Εισάγετε το μήνα και το έτος κατάθεσης της εργασίας).
 \newpage
+\thispagestyle{empty}
 \hspace{10pt}
 
 \vspace{30ex}
@@ -163,17 +176,17 @@ TMHMA
 (Εισάγετε τον απονεμηθέντα τίτλο του συγγραφέα) \\
 \vspace{8ex}
 
-\noindent
-................................... \\
-\textbf{(Εισάγετε όνομα, αρχικό πατρώνυμου και επίθετο συγγραφέα)} \\
-(Εισάγετε τον απονεμηθέντα τίτλο του συγγραφέα) \\
-\vspace{8ex}
-
-\noindent
-................................... \\
-\textbf{(Εισάγετε όνομα, αρχικό πατρώνυμου και επίθετο συγγραφέα)} \\
-(Εισάγετε τον απονεμηθέντα τίτλο του συγγραφέα) \\
-\vspace{26ex}
+%%\noindent
+%%................................... \\
+%%\textbf{(Εισάγετε όνομα, αρχικό πατρώνυμου και επίθετο συγγραφέα)} \\
+%%(Εισάγετε τον απονεμηθέντα τίτλο του συγγραφέα) \\
+%%\vspace{8ex}
+%%
+%%\noindent
+%%................................... \\
+%%\textbf{(Εισάγετε όνομα, αρχικό πατρώνυμου και επίθετο συγγραφέα)} \\
+%%(Εισάγετε τον απονεμηθέντα τίτλο του συγγραφέα) \\
+%%\vspace{26ex}
 
 \small
 \noindent
@@ -201,6 +214,8 @@ All rights reserved.
 \include{chapter3}
 
 \include{chapter4}
+
+\include{chapter5}
 
 mpla ~\cite{gao2017containerleaks}
 
