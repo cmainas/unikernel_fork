@@ -2,9 +2,11 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <netdb.h>
 #include <arpa/inet.h>
 
 #define PORT	23456	//The port that will be used
+struct hostent *hp;
 
 //create a socket and check for any errors
 int create_socket(int dom, int type, int proto)
@@ -15,6 +17,27 @@ int create_socket(int dom, int type, int proto)
 		exit(1);
 	}
 	return descr;
+}
+
+//connect to remote socket and check for errors
+void connect_wrapper(int sock, struct sockaddr_in *saddr, socklen_t len)
+{
+	if (connect(sock, (struct sockaddr *) saddr, len) < 0) {
+		perror("connect");
+		exit(1);
+	}
+	return;
+}
+
+//get the ip of hostname and check for errors
+struct hostent *get_host_addr(char *h) {
+	struct hostent *hp;
+	hp = gethostbyname(h);
+	if (!hp) {
+		printf("DNS lookup failed for host %s\n", h);
+		exit(1);
+	}
+	return hp;
 }
 
 //prepare the struct sockaddr_in for the bind system call
@@ -75,32 +98,65 @@ int read_from_descr(int dscr, char *buffer)
 	return n;
 }
 
-int main()
+int my_pipe(int fildes[])
 {
-	int sd, newsd; 
-	struct sockaddr_in sa;
-	char buf[30];
 	socklen_t len;
+	int rsd, wsd, newrsd;
+	struct sockaddr_in sa;
+	// READ part of pipe
 	/* Create TCP/IP socket*/
-	sd = create_socket(PF_INET, SOCK_STREAM, 0);
+	rsd = create_socket(PF_INET, SOCK_STREAM, 0);
 	fprintf(stderr, "Created TCP socket\n");
 	/* Bind to a well-known port */
 	init_socket_address(&sa, AF_INET, PORT, INADDR_ANY);
-	bind_socket(sd, &sa, sizeof(struct sockaddr_in));
+	bind_socket(rsd, &sa, sizeof(struct sockaddr_in));
 	fprintf(stderr, "Bound TCP socket to port %d\n", PORT);
 	/* Listen for incoming connections */
-	listen_to_socket(sd, 2);
+	listen_to_socket(rsd, 2);
 	fprintf(stderr, "Waiting for an incoming connection...\n");
 	/* Accept an incoming connection */
 	len = sizeof(struct sockaddr_in);
-	newsd = wait_new_con(sd, &sa, &len);
+	newrsd = wait_new_con(rsd, &sa, &len);
 	fprintf(stderr, "Incoming connection\n");
-	read_from_descr(newsd, buf);
+	fildes[0] = newrsd;
+	// Write part of pipe
+	// Create TCP/IP socket
+	wsd = create_socket(PF_INET, SOCK_STREAM, 0);
+	fprintf(stderr, "Created TCP socket\n");
+	// Bind to a well-known port 
+	fprintf(stderr, "Connecting to remote host... ");
+	//prepare the struct sockaddr_in for the connect system call
+	sa.sin_family = AF_INET;
+	sa.sin_port = htons(PORT);
+	memcpy(&sa.sin_addr.s_addr, hp->h_addr, sizeof(struct in_addr));
+	//init_socket_address(&sa, AF_INET, PORT, hp->h_addr);
+	connect_wrapper(wsd, &sa, sizeof(sa));
+	fprintf(stderr, "Connected.\n");
+	fildes[1] = wsd;
+	return 0;
+}
+
+int main(int argc, char *argv[])
+{
+	int pipe[2]; 
+	char buf[30];
+	//check command line argunments
+	if(argc < 2) {
+		fprintf(stderr, "Usage: %s [IP address or hostname of server]\n"
+				, argv[0]);
+		exit(1);
+	}
+	hp = get_host_addr(argv[1]);
+	if (my_pipe(pipe) != 0) {
+		fprintf(stderr, "eroor creating pipe\n");
+		return 1;
+	}
+	read_from_descr(pipe[0], buf);
 	printf("Got message: %s", buf);
-	if (close(newsd) < 0)
-		perror("close newsd");
-	if (close(sd) < 0)
-		perror("close sd");
+	if (close(pipe[0]) < 0)
+		perror("close read end");
+	if (close(pipe[1]) < 0)
+		perror("close write end");
 	printf("Time to die\n");
 	return 0;
 }
