@@ -7,34 +7,40 @@
 #include <sys/malloc.h>
 #include <netinet/in.h>
 
-int my_pipe_close(file_t *fp);
-int my_pipe_read(file_t *fp, off_t *offset, struct uio *uio, kauth_cred_t cred,
-		int flags);
-int my_pipe_write(file_t *fp, off_t *offset, struct uio *uio, kauth_cred_t cred,
-		int flags);
-int my_bind(struct sockaddr_in *sin, struct socket *so, struct lwp *l);
-void prep_send(struct sockaddr_in *sin);
+static int my_pipe_close(file_t *fp);
+static int my_pipe_close(file_t *fp);
+static int my_pipe_read(file_t *fp, off_t *offset, struct uio *uio, 
+		kauth_cred_t cred, int flags);
+static int my_pipe_write(file_t *fp, off_t *offset, struct uio *uio, 
+		kauth_cred_t cred, int flags);
+static int my_pipe_ioctl(file_t *fp, u_long cmd, void *data);
+static int my_bind(struct socket *so, struct lwp *l);
+
+#define SETIPADDR _IOW('f', 132, int *)
 
 const struct fileops my_pipeops = {
 	.fo_read = my_pipe_read,
 	.fo_write = my_pipe_write,
+	.fo_ioctl = my_pipe_ioctl,
 	.fo_close = my_pipe_close,
 };
 
 struct my_pipe_data {
 	struct socket *so;
-	struct sockaddr_in *sin;
+	uint32_t ip;
 	int fd;
 };
 
 #define PORT		23456	//the port that will be used
 //IP of the server
+#define SERVER_IP		(((((192 << 8) | 168) << 8) | 1) << 8) | 13
 #define SEND_IP		(((((192 << 8) | 168) << 8) | 1) << 8) | 13
+
 
 /*
  * Handle the close request 
  */
-int my_pipe_close(file_t *fp)
+static int my_pipe_close(file_t *fp)
 {
 	/* close the socket */
 	/* TODO free any allocated memory */
@@ -47,8 +53,8 @@ int my_pipe_close(file_t *fp)
 /*
  * Handle the read 
  */
-int my_pipe_read(file_t *fp, off_t *offset, struct uio *uio, kauth_cred_t cred,
-		int flags)
+static int my_pipe_read(file_t *fp, off_t *offset, struct uio *uio, 
+		kauth_cred_t cred, int flags)
 {
 	struct my_pipe_data *rmpd = fp->f_data; 
 	int ret = 0, rcvflags = 0;;
@@ -57,27 +63,65 @@ int my_pipe_read(file_t *fp, off_t *offset, struct uio *uio, kauth_cred_t cred,
 	** The message is passed to userspace */
 	ret = soreceive(rmpd->so, (struct mbuf **) &from, uio, NULL, NULL,
 		       	&rcvflags);
-	printf("Incoming connection\n");
+	if (from == NULL)
+		printf("blakeies\n");
+	//struct sockaddr_in *sin = (struct sockaddr_in *) from;
+	printf("Incoming connection: %u\n", (unsigned int) from->sa_len);
 	return ret;
 }
 
 /*
  * Handle the write for the device
  */
-int my_pipe_write(file_t *fp, off_t *offset, struct uio *uio, kauth_cred_t cred,
-	       	int flags)
+static int my_pipe_write(file_t *fp, off_t *offset, struct uio *uio, 
+		kauth_cred_t cred, int flags)
 {
 	struct my_pipe_data *wmpd = fp->f_data; 
 	int ret = 0;
 	/* Send the message from userspace */
-	ret = sosend(wmpd->so, (struct sockaddr *)wmpd->sin, uio, NULL, NULL,
+	//printf("KERNEL: send to ip %u\n", wmpd->sin->sin_addr.s_addr);
+	struct sockaddr_in *sin, ssin;
+	/* prepare the struct sockaddr_in */
+	sin = &ssin;
+        bzero(sin, sizeof *sin);
+        sin->sin_len = sizeof(*sin);
+        sin->sin_family = AF_INET;
+        //sin->sin_addr.s_addr = htonl(SERVER_IP);
+        sin->sin_addr.s_addr = wmpd->ip;
+	printf("KERNEL: ip = %u\n", sin->sin_addr.s_addr);
+	sin->sin_port = htons(PORT);
+	ret = sosend(wmpd->so, (struct sockaddr *)sin, uio, NULL, NULL,
 		       	0, curlwp);
 	return ret;
 }
 
-int my_bind(struct sockaddr_in *sin, struct socket *so, struct lwp *l)
+/*
+ * Handle ioctl for my_pipe 
+ */
+static int my_pipe_ioctl(file_t *fp, u_long cmd, void *data) 
+{
+	struct my_pipe_data *wmpd = fp->f_data; 
+	int ret = 0;
+	//int *ip = data;
+	uint32_t *ip = data;
+	switch (cmd) {
+		case SETIPADDR:
+			//printf("KERNEL: Got ip %d:%d:%d:%d\n", ip[0], ip[1], ip[2], ip[3]);
+			printf("KERNEL: Got ip %u\n", *ip);
+			printf("KERNEL: other ip %u\n", htonl(SEND_IP));
+			wmpd->ip = *ip;
+			break;
+		default: 
+			ret = ENODEV;
+	}
+	return ret;
+}
+
+static int my_bind(struct socket *so, struct lwp *l)
 {
 	int ret = 0;
+	struct sockaddr_in *sin, ssin;
+	sin = &ssin;
         bzero(sin, sizeof(struct sockaddr_in));
         sin->sin_len = sizeof(struct sockaddr_in);
         sin->sin_family = AF_INET;
@@ -90,16 +134,6 @@ int my_bind(struct sockaddr_in *sin, struct socket *so, struct lwp *l)
 	return ret;
 }
 
-void prep_send(struct sockaddr_in *sin)
-{
-	/* prepare the struct sockaddr_in */
-        bzero(sin, sizeof *sin);
-        sin->sin_len = sizeof(*sin);
-        sin->sin_family = AF_INET;
-        sin->sin_addr.s_addr = htonl(SEND_IP);
-	sin->sin_port = htons(PORT);
-}
-
 int sys_my_pipe(struct lwp *l, const struct sys_my_pipe_args *uap, 
 		register_t *retval)
 {
@@ -107,18 +141,12 @@ int sys_my_pipe(struct lwp *l, const struct sys_my_pipe_args *uap,
 	int fd[2], error, descr;
 	struct my_pipe_data *rd, *wd;
 	struct socket *rso, *wso;
-	struct sockaddr_in *rsin, *wsin;
+	//struct sockaddr_in *rsin, *wsin;
 	/* allocate memory */
 	if ((rd = malloc(sizeof(struct my_pipe_data), M_TEMP, M_WAITOK)) == 
 		NULL)
 		return ENOMEM;
 	if ((wd = malloc(sizeof(struct my_pipe_data), M_TEMP, M_WAITOK)) == 
-		NULL)
-		return ENOMEM;
-	if ((rsin = malloc(sizeof(struct my_pipe_data), M_TEMP, M_WAITOK)) == 
-		NULL)
-		return ENOMEM;
-	if ((wsin = malloc(sizeof(struct my_pipe_data), M_TEMP, M_WAITOK)) == 
 		NULL)
 		return ENOMEM;
 	/* create sockets */
@@ -129,13 +157,12 @@ int sys_my_pipe(struct lwp *l, const struct sys_my_pipe_args *uap,
 			!= 0)
 		return error;
 	printf("Created UDP sockets\n");
-	if ((error = my_bind(rsin, rso, l)) != 0)
+	if ((error = my_bind(rso, l)) != 0)
 		return error;
-	prep_send(wsin);
 	rd->so = rso;
-	rd->sin = rsin;
+	rd->ip = 0;
 	wd->so = wso;
-	wd->sin = wsin;
+	wd->ip = 0;
 
 	/* allocate read end of pipe */
 	error = fd_allocfile(&rf, &descr);
