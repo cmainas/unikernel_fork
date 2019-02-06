@@ -6,7 +6,8 @@
 \usepackage{indentfirst}
 \usepackage{xltxtra}
 \usepackage{xgreek}
-%%\usepackage{listings}
+\usepackage{listings}
+\usepackage[usenames, dvipsnames]{color}
 %%\usepackage{caption}
 \usepackage{cite}
 %%\usepackage{float}
@@ -37,6 +38,29 @@
 %%}
 
 \begin{document}
+
+\lstset{
+	language=C,                % choose the language of the code
+	numbers=left,                   % where to put the line-numbers
+	stepnumber=1,                   % the step between two line-numbers.        
+	numbersep=5pt,                  % how far the line-numbers are from the code
+	backgroundcolor=\color{white},  % choose the background color. You must add \usepackage{color}
+	basicstyle=\ttfamily,
+	keywordstyle=\color{Maroon}\ttfamily,
+	stringstyle=\color{blue}\ttfamily,
+	commentstyle=\color{Gray}\ttfamily,
+	morecomment=[l][\color{ForestGreen}]{\#}
+	showspaces=false,               % show spaces adding particular underscores
+	showstringspaces=false,         % underline spaces within strings
+	showtabs=false,                 % show tabs within strings adding particular underscores
+	tabsize=8,                      % sets default tabsize to 2 spaces
+	captionpos=b,                   % sets the caption-position to bottom
+	breaklines=true,                % sets automatic line breaking
+	breakatwhitespace=true,         % sets if automatic breaks should only happen at whitespace
+	title=\lstname,                 % show the filename of files included with \lstinputlisting;
+}
+\renewcommand*{\lstlistingname}{Code}
+
 %%\title{
 \addtolength{\topmargin}{-0.5in}
 \thispagestyle{empty}
