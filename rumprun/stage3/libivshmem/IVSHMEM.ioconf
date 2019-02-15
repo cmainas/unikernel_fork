@@ -1,4 +1,4 @@
-#	$NetBSD: PCI_VIRTIO.ioconf,v 1.1 2014/08/22 09:45:29 pooka Exp $
+#	$NetBSD: IVSHMEM.ioconf,v 1.0 2018/07/22 09:45:29 
 #
 
 ioconf ivshmem
