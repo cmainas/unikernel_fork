@@ -5,7 +5,7 @@
 \usepackage{xunicode}
 \usepackage{indentfirst}
 \usepackage{xltxtra}
-\usepackage{xgreek}
+%\usepackage{xgreek}
 \usepackage{listings}
 \usepackage[usenames, dvipsnames]{color}
 %%\usepackage{caption}
@@ -36,6 +36,12 @@
 %%    colorlinks=true, %set true if you want colored links
 %%    linkcolor=black,  %choose some color if you want links to stand out
 %%}
+
+%%\usepackage{polyglossia}
+%%\setmainlanguage{greek}
+%%\setotherlanguage{english}
+\usepackage[english, greek]{babel}
+\newcommand{\EN}[1]{\foreignlanguage{english}{#1}}
 
 \begin{document}
 
@@ -240,8 +246,6 @@ All rights reserved.
 \include{chapter4}
 
 \include{chapter5}
-
-mpla ~\cite{gao2017containerleaks}
 
 \bibliographystyle{plain}
 \bibliography{ref}{}
