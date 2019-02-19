@@ -5,7 +5,8 @@
 #include <sys/proc.h>
 #include <sys/bus.h>
 
-#define VMCALL_ID 100
+#include <sys/time.h>
+#define NSEC            1000000000
 
 /* hypercall using io vm exit */
 static inline uint32_t inl(uint16_t port)
@@ -14,11 +15,6 @@ static inline uint32_t inl(uint16_t port)
 	__asm__ __volatile__("inl %1, %0" : "=a"(rv) : "d"(port));
 	return rv;
 }
-
-//static void outb(uint8_t value, uint16_t port) 
-//{
-//        asm("outb %0,%1" : /* empty */ : "a" (value), "Nd" (port) : "memory");
-//}
 
 static void increase_pipe_rw(bus_size_t n, bus_size_t lock)
 {
@@ -33,8 +29,9 @@ static void increase_pipe_rw(bus_size_t n, bus_size_t lock)
 
 int sys_my_fork(struct lwp *l, const void *v, register_t *retval)
 {
-	//outb(77, 0xffdc);
 	/* check for opened pipes */
+	//struct timespec tol1, tol2, t1, t2;
+	//nanotime(&tol1);
 	fdfile_t *ff;
 	file_t *fp;
 	fdtab_t *dt;
@@ -61,40 +58,30 @@ int sys_my_fork(struct lwp *l, const void *v, register_t *retval)
 						pipe_op->pipe->lock);
 		}
 	}
-	//file_t *file;
-	//filedesc_t *fd_t = l->l_fd;
-	//struct my_pipe_op *pipe_op;
-	//int i = 0;
-	//u_int files_num = fd_t->fd_dt->dt_nfiles;
-	//for (i = 0; i < files_num; i++) {
-	//	file = fd_getfile(fd_t, i);
-	//	if (file->f_type == DTYPE_MISC) {
-	//		pipe_op = file->f_data;
-	//		if (pipe_op->oper == 0)
-	//			/* increase readers by one */
-	//			increase_pipe_rw(pipe_op->pipe->nreaders, 
-	//					pipe_op->pipe->lock);
-	//		else if (pipe_op->oper == 1)
-	//			/* increase writers by one */
-	//			increase_pipe_rw(pipe_op->pipe->nwriters, 
-	//					pipe_op->pipe->lock);
-	//	}
-	//}
 
 	/* start migration */
 	unsigned int ret; 
+	//nanotime(&t1);
 	ret = inl(0xffdd);
+	//nanotime(&t2);
+	//printf("KERNEL: start migration hypercall: %ldns\n", (t2.tv_sec - t1.tv_sec) * NSEC + t2.tv_nsec - t1.tv_nsec);
 	/* wait until migration is over */
-	ret = inl(0xffdc);
+	//nanotime(&t1);
+	ret = inl(0xffdb);
 	while (ret == 0) {
-		ret = inl(0xffdc);
+		ret = inl(0xffdb);
 	}
+	//nanotime(&t2);
+	//printf("KERNEL: wait migration: %ldns\n", (t2.tv_sec - t1.tv_sec) * NSEC + t2.tv_nsec - t1.tv_nsec);
 	/* when migration is finished child will get 2, 
 	 * while parent will get 1
 	 */
 	if (ret == 1) {
 		/* parent return process id of new qeemu instance */
+		//nanotime(&t1);
 		*retval = inl(0xffdc);
+		//nanotime(&t2);
+		//printf("KERNEL: create vm: %ldns\n", (t2.tv_sec - t1.tv_sec) * NSEC + t2.tv_nsec - t1.tv_nsec);
 		if (flag == 1) {
 			while( bus_space_read_1(sharme.data_t, sharme.data_h, 
 						sharme.data_s - 1) != 77)
@@ -108,5 +95,7 @@ int sys_my_fork(struct lwp *l, const void *v, register_t *retval)
 					sharme.data_s - 1, 77);
 		}
 	}
+	//nanotime(&tol2);
+	//printf("KERNEL: fork system call: %ldns\n", (tol2.tv_sec - tol1.tv_sec) * NSEC + tol2.tv_nsec - tol1.tv_nsec);
 	return 0;
 }

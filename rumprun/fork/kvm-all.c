@@ -55,6 +55,7 @@
 #include "qemu/cutils.h"
 #include "qmp-commands.h"
 #include "exec/target_page.h"
+
 #define BUFFER_DELAY     100
 #define XFER_LIMIT_RATIO (1000 / BUFFER_DELAY)
 
@@ -149,7 +150,8 @@ static const KVMCapabilityInfo kvm_required_capabilites[] = {
 };
 
 char **execve_argv(void);
-void my_fork(void *data, bool *check);
+void check_migration(void *data);
+void my_fork(void *data);
 void my_start_migration(void *data);
 void my_exec_start_outgoing_migration(MigrationState *s, const char *command, Error **errp);
 void my_migration_channel_connect(MigrationState *s,
@@ -2320,14 +2322,12 @@ char **execve_argv(void)
 	return new_argv;
 }
 
-/* fork hypercall from guest, checks if migration has been completed and then 
- * spawns a new vm that uses the migration data that have been generated
+/* check_migration hypercall from guest, checks if migration has been 
+ * completed 
  * */
-void my_fork(void *data, bool *check)
+void check_migration(void *data)
 {
 	uint8_t *ptr = data;
-	pid_t p = 0;
-
 	/* check if migration is completed
 	 * While migration is not completed return 0 to vm
 	 * If migration is completed then check how many times has the guest
@@ -2338,20 +2338,25 @@ void my_fork(void *data, bool *check)
 	 * that it is the parent and will re issue the hypercall to fork*/
 	MigrationState *s = migrate_get_current();
 	if(s->migration_thread_running == true) {
-		my_cnt = 1;
-		stl_p(ptr,p);
+		my_cnt++;
+		stl_p(ptr,0);
 		return;
 	}
-	if(my_cnt > 0) {
-		if (*check == true) {
-			stl_p(ptr,1);
-			*check = false;
-			return;
-		}
-	} else {
+	if(my_cnt > 0) 
+		stl_p(ptr,1);
+	else 
 		stl_p(ptr,2);
-		return;
-	}
+	return;
+}
+
+/* fork hypercall from guest, 
+ * spawns a new vm that uses the migration file that have been generated
+ * */
+void my_fork(void *data)
+{
+	uint8_t *ptr = data;
+	pid_t p = 0;
+
 	p = fork();
 	if (p == 0) {
 		/* child */
@@ -2386,8 +2391,6 @@ int kvm_cpu_exec(CPUState *cpu)
 {
     struct kvm_run *run = cpu->kvm_run;
     int ret, run_ret;
-
-    bool check = true;
 
     DPRINTF("kvm_cpu_exec()\n");
 
@@ -2462,9 +2465,15 @@ int kvm_cpu_exec(CPUState *cpu)
         switch (run->exit_reason) {
         case KVM_EXIT_IO:
             DPRINTF("handle_io\n");
+	    /* check the status of migration thread */
+	    if (run->io.port == 0xffdb && run->io.direction == KVM_EXIT_IO_IN ) {
+		    check_migration((uint8_t *)run + run->io.data_offset);
+		    ret = 0;
+		    break;
+	    }
 	    /* fork hypercall */
 	    if (run->io.port == 0xffdc && run->io.direction == KVM_EXIT_IO_IN ) {
-		    my_fork((uint8_t *)run + run->io.data_offset, &check);
+		    my_fork((uint8_t *)run + run->io.data_offset);
 		    ret = 0;
 		    break;
 	    }
