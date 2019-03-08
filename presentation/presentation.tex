@@ -175,7 +175,7 @@ WWW: \url{http://cslab.ece.ntua.gr/research/}\\
 \subsection{Βασική ιδέα}
 \begin{frame}
 \frametitle{Βασική ιδέα}
-\begin{block}{Κοινό χαρακτηριστικό}
+\begin{block}{single process}
 \begin{itemize}
 \item Βασικό κοινό χαρακτηριστικό όλων των unikernels, είναι ότι είναι single process
 \item Συνεπώς δεν υποστηρίζεται η κλήση fork, σε κανένα unikernel
@@ -186,7 +186,23 @@ WWW: \url{http://cslab.ece.ntua.gr/research/}\\
 \item Προσπαθούμε να κάνουμε τα unikernels όσο πιο πολύ POSIX friendly γίνεται
 \item Θέλουμε να κρατήσουμε τα βασικά χαρακτηριστικά των unikernels
 \item Αντιλαμβανόμαστε τα unikernels ως διεργασίες και το hypervisor ως λειτουργικό συτημα
-\item Συνεπώς μία κλήση fork, θα οδηγούσε στη δημιουργία μίας νέας διεργασίας unikernel, αντί για μία διεργασία μέσα στο υπάρχον unikernel.
+\end{itemize}
+\end{block}
+\end{frame}
+
+\begin{frame}
+\frametitle{Αντικείμενο διπλωματικής}
+\begin{block}{Μηχανισμός fork}
+\begin{itemize}
+\item Με βάση αυτή την ιδέα, υλοποιούμε ένα μηχανσιμό fork, ο οποίος αντί για τη δημιουργία μίας νέας διεργασίας εντός του unikernel, έχει ως αποτέλεσμα τη δημιουργία ενός νέου unikernel
+\item Ουσιαστικά μεταφέρουμε το μηχανσιμό fork, από το επίπεδο των διεργασιών στο επίπεδο των εικονικών μηχανών
+\end{itemize}
+\end{block}
+\begin{block}{Μηχανσιμός pipe}
+\begin{itemize}
+\item Συχνό φαινόμενο όταν δημιουργείται μία νέα διεργασία είναι να επικοινωνεί αυτή με τη διεργασία γονέας
+\item Μία από τις πιο συνήθεις πρακτικές για αυτό το σκοπό είναι η χρήση του μηχανσιμού pipe
+\item Κατασκευή ενός μηχανισμού pipe σε επίπεδο εικονικών μηχανών. 
 \end{itemize}
 \end{block}
 \end{frame}
