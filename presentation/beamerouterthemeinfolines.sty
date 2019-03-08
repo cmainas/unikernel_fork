@@ -1,0 +1,84 @@
+% Copyright 2007 by Till Tantau
+%
+% This file may be distributed and/or modified
+%
+% 1. under the LaTeX Project Public License and/or
+% 2. under the GNU Public License.
+%
+% See the file doc/licenses/LICENSE for more details.
+
+\ProvidesPackageRCS $Header: /cvsroot/latex-beamer/latex-beamer/themes/outer/beamerouterthemeinfolines.sty,v 1.9 2007/01/28 20:48:30 tantau Exp $
+
+
+\mode<presentation>
+
+\setbeamercolor*{author in head/foot}{parent=palette tertiary}
+\setbeamercolor*{title in head/foot}{parent=palette secondary}
+\setbeamercolor*{date in head/foot}{parent=palette primary}
+
+\setbeamercolor*{section in head/foot}{parent=palette tertiary}
+\setbeamercolor*{subsection in head/foot}{parent=palette primary}
+
+\xdefinecolor{nanos}{rgb}{0.5,0,0}
+
+\setbeamercolor*{mycolor}{fg=red,bg=nanos}
+\setbeamercolor*{bar color}{fg=black,bg=white}
+
+\defbeamertemplate*{footline}{infolines theme}
+{
+  %\leavevmode%
+  \ifnum\insertframenumber=1\else
+  \hbox{%
+  %\begin{tikzpicture}
+  %\draw [thick,fill=red!50,out=0, in=0,rounded corners] (0,0) -- (8,0);
+  %\end{tikzpicture}
+  \begin{beamercolorbox}[wd=\paperwidth,ht=2pt,right]{mycolor}%
+%\vfill%
+\vspace{-3.0ex}%
+  \llap{\insertlogo}\hspace*{2em}%
+%\llap{\includegraphics[scale=0.14]{figs/cslab_logo1.eps}\includegraphics[scale=0.04]{figs/ntua_logo.eps}\hspace*{1cm}}%
+  \end{beamercolorbox}%
+  %\begin{beamercolorbox}[wd=.333333\paperwidth,ht=2.25ex,dp=1ex,center]{title in head/foot}%
+  %  \usebeamerfont{title in head/foot}\insertshorttitle
+  %\end{beamercolorbox}%
+%}%
+}%
+\vspace*{2pt}%
+  \begin{beamercolorbox}[wd=.715\paperwidth,ht=2.05ex,dp=1ex,center]{bar color}%
+    \usebeamerfont{date in head/foot}\insertshortdate{}\hspace*{1em}
+    \usebeamerfont{title in head/foot}\insertshorttitle\hspace*{2em}
+    \usebeamerfont{author in head/foot}\insertshortauthor~@~\insertshortinstitute
+%  \end{beamercolorbox}%
+%\vspace*{2pt}%
+\hfill \hfill%
+    \insertframenumber{} %/ \inserttotalframenumber\hspace*{2ex}
+%   \hspace*{2ex}%
+ % \llap{\insertlogo\hskip2cm}%
+  \end{beamercolorbox}%
+
+  %\vfill%
+  %\ifnum\insertframenumber=1\else
+%  \vskip8pt%
+  \fi
+
+%  \llap{\usebeamertemplate***{navigation symbols}\hskip0.1cm}%
+
+}
+
+\defbeamertemplate*{headline}{infolines theme}
+{
+  \leavevmode%
+  \hbox{%
+  \begin{beamercolorbox}[wd=.5\paperwidth,ht=2.25ex,dp=1ex,right]{section in head/foot}%
+    \usebeamerfont{section in head/foot}\insertsectionhead\hspace*{2ex}
+  \end{beamercolorbox}%
+  \begin{beamercolorbox}[wd=.5\paperwidth,ht=2.25ex,dp=1ex,left]{subsection in head/foot}%
+    \usebeamerfont{subsection in head/foot}\hspace*{2ex}\insertsubsectionhead
+  \end{beamercolorbox}}%
+  \vskip0pt%
+}
+
+\setbeamersize{text margin left=1em,text margin right=1em}
+
+\mode
+<all>
