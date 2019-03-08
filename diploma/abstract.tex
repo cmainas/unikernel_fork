@@ -10,7 +10,7 @@
 	εικονικές αυτές μηχανές να χρησιμοποιούνται για την εκτέλεση μίας και
 	μόνο εφαρμογής. Αυτό έχει ως αποτέλεσμα, να χαραμείζονται πόροι σε
 	ενέργειες που δε χρειάζονται από την εφαρμογή, αλλά είναι απαραίτητες
-	για το λειτουργικό σύστημα στο οποίο τρέχουν αυτές οι εφαρμογές. 
+	για το λειτουργικό σύστημα στο οποίο εκτελούνται αυτές οι εφαρμογές. 
 	
 Μία νεότερη τάση για την υποστήριξη του cloud computing είναι τα
 	containers, που προσφέρουν ελαφρύτερη εικονικοποίηση με γρηγορους
@@ -21,16 +21,16 @@
 	εικονικών μηχανών για τη φιλοξενία των containers, χάνοντας αρκετά από
 	τα πλεονεκτήματα τους.  
 
-Μία ακόμη προσέγγιση στο θέμα είναι οι unikernels. Πρόκειται για μία εικόνα
+Μία ακόμη προσέγγιση στο θέμα είναι τα unikernels. Πρόκειται για μία εικόνα
 	εικονικής μηχανής, με ένα μόνο address space το οποίο κατασκευάζεται από
 	library operating systems και είναι ειδικευμένο για μία συγκεκριμένη
 	εφαρμογή. Πιο απλά, περιέχει τον κώδικα της εφαρμογής και ακριβώς ό,τι
 	κομμάτι του λειτουργικού συστήματος χρειάζεται η εφαρμογή για να
 	λειτουργήσει η διεργασία (drivers, βιβλιοθήκες, κ.λ.π.), ενοποιημένα 
 	σαν ένα	αυτόνομο πρόγραμμα που μπορεί να τρέξει ως εικονική μηχανή.
-	Οι unikernels καταφέρνουν να έχουν γρήγορους χρόνους εκκίνησης και μικρή
+	Τα unikernels καταφέρνουν να έχουν γρήγορους χρόνους εκκίνησης και μικρή
 	κατανάλωση μνήμης, χωρίς να θυσιάζεται η ασφάλεια
-	Εν τούτοις, ένα πρόβλημα είναι ότι οι unikernels υποστηρίζουν μία και
+	Εν τούτοις, ένα πρόβλημα είναι ότι τα unikernels υποστηρίζουν μία και
 	μόνο διεργασία, με αποτέλεσμα να μην μπορούν εφαρμογές με παραπάνω από
 	μία διεργασίες να εκτελεστούν σε unikernels. 
 
@@ -43,13 +43,17 @@
 Λέξεις-Κλειδιά: εικονικοποίηση, εικονικές μηχανές, ενδοεπικοινωνία εικονικών μηχανών, unikernel, kvm, QEMU
 \end{abstract}
 
+\newpage
+\thispagestyle{empty}
+\hspace{10pt}
+\newpage
 \renewcommand{\abstractname}{Abstract}
 \selectlanguage{english}
 
 \begin{abstract}
 In recent years cloud computing is one important chapter of modern commputer
 	science. The main technology used in order to support cloud computing is
-	virtualization. Virtualization makes possible for a physical machine to
+	virtualization. Virtualization allows a physical machine to
 	host many virtual machines, each one of which is a self-sufficient
 	computer. However, virtual machines are often used to execute a single
 	application. As a result, resources are devoted to actions that are not
@@ -84,5 +88,7 @@ The purpose of this thesis is to implement a mechanism that will enable the
 Keywords: virtualization, virtual machines, inter-vm communication, unikernel, kvm, QEMU
 \end{abstract}
 
+%%TODO: teleutaia protash sto aggliko, mhpws mporei na ginei kaluterh?
 \selectlanguage{greek}
+
 
