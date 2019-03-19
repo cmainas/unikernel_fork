@@ -109,7 +109,7 @@ WWW: \url{http://cslab.ece.ntua.gr/research/}\\
 		\begin{itemize}
 			\item Φτιαγμένο από την αρχή, με στόχο την εκτέλεση στο cloud
 			\item POSIX compatible
-			\item Υποστήριξη για threads, filesystem.
+			\item Υποστήριξη για threads, filesystem
 			\item Υποστηρίζει πολλές γλώσσες
 			\item Πολλές εφαρμογές έτοιμες να εκτελεστούν σε αυτό
 			\item Από τα πιο ενεργά projects
@@ -217,8 +217,8 @@ int pipe(int fildes[2]); \\
 Pipe semantics:
 \begin{itemize}
 \item Αν το pipe είναι άδειο, η κλήση ανάγνωσης μπλοκάρει μέχρι να προκύψουν δεδομένα
-\item Αν το pipe είναι γεμάτο, η κλήση εγγραφής μπλοκάρει μέχρι να ρλρυθερωθεί χώρος
-\item Αν δεν υπάρχουν ανοιχτά άκρα εγγραφής, τότε εανάγνωση στο pipe επιστρέφει 0, end of file
+\item Αν το pipe είναι γεμάτο, η κλήση εγγραφής μπλοκάρει μέχρι να ελευθερωθεί χώρος
+\item Αν δεν υπάρχουν ανοιχτά άκρα εγγραφής, τότε η ανάγνωση στο pipe επιστρέφει 0, end of file
 \item Αν δεν υπάρχουν ανοιχτά άκρα ανάγνωσης, τότε εγγραφή στο pipe επιστρέφει το error EPIPE
 \end{itemize}
 \end{block}
@@ -231,9 +231,9 @@ Pipe semantics:
 \end{block}
 \begin{block}{Τρία στάδια υλοποίησης}
 \begin{enumerate}
-\item function call (με χρήση TCP/IP sockets)
-\item system call (με χρήση UDP sockets)
-\item system call (με χρήση κοινής μνήμης μεταξύ εικονικών μηχανών)
+\item function call (sockets)
+\item system call (sockets)
+\item system call (κοινή μνήμη)
 \end{enumerate}
 \end{block}
 \end{frame}
@@ -245,8 +245,8 @@ Pipe semantics:
 \begin{block}{function call}
 \begin{itemize}
 \item Στον κώδικα της εφαρμογής
-\item Δημιουργία δύο sockets
-\item Επιστροφή των δύο sockets.
+\item Δημιουργία δύο sockets (TCP)
+\item Επιστροφή των δύο sockets
 \item Διεύθυνση παραλήπτη
 \item Δεν υλοποιήθηκαν όλα τα semantics του pipe 
 \end{itemize}
@@ -392,7 +392,7 @@ Pipe semantics:
 \begin{frame}
 \frametitle{Ενημέρωση κοινών μεταβλητών στο pipe}
 \begin{itemize}
-\item Αν υπάρχει pipe θα πρέπει να ενημρωθούν οι κοινές μεταβλητές
+\item Αν υπάρχει pipe θα πρέπει να ενημερωθούν οι κοινές μεταβλητές
 \item Έλεγχος ύπαρξης pipe
 \item Αύξηση των μετρητών ανοιχτών άκρων
 \item Πρόσβαση στην κοινή μνήμη
