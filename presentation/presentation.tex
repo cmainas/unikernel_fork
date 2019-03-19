@@ -52,7 +52,7 @@ WWW: \url{http://cslab.ece.ntua.gr/research/}\\
 \begin{frame}
 \frametitle{Εισαγωγή}
 \begin{block}{Unikernels}
-Εξειδικευμένες εικόνες μηχανές, με ένα μοναδικό χώρο διευθύνσεων, τα οποία κατασκευάζονται χρησιμοποιώντας library operating systems
+Εξειδικευμένες εικόνες μηχανής, με ένα μοναδικό χώρο διευθύνσεων, τα οποία κατασκευάζονται χρησιμοποιώντας library operating systems
 \end{block}
 \begin{block}{Αναλύοντας τον ορισμό}
 \begin{itemize}
@@ -210,19 +210,19 @@ WWW: \url{http://cslab.ece.ntua.gr/research/}\\
 \section{Μηχανισμός pipe}
 \subsection{Γενική εικόνα}
 
-\begin{frame}
-\frametitle{Γενική εικόνα}
-\begin{block}{Pipe system call}
-int pipe(int fildes[2]); \\
-Pipe semantics:
-\begin{itemize}
-\item Αν το pipe είναι άδειο, η κλήση ανάγνωσης μπλοκάρει μέχρι να προκύψουν δεδομένα
-\item Αν το pipe είναι γεμάτο, η κλήση εγγραφής μπλοκάρει μέχρι να ελευθερωθεί χώρος
-\item Αν δεν υπάρχουν ανοιχτά άκρα εγγραφής, τότε η ανάγνωση στο pipe επιστρέφει 0, end of file
-\item Αν δεν υπάρχουν ανοιχτά άκρα ανάγνωσης, τότε εγγραφή στο pipe επιστρέφει το error EPIPE
-\end{itemize}
-\end{block}
-\end{frame}
+%%\begin{frame}
+%%\frametitle{Γενική εικόνα}
+%%\begin{block}{Pipe system call}
+%%int pipe(int fildes[2]); \\
+%%Pipe semantics:
+%%\begin{itemize}
+%%\item Αν το pipe είναι άδειο, η κλήση ανάγνωσης μπλοκάρει μέχρι να προκύψουν δεδομένα
+%%\item Αν το pipe είναι γεμάτο, η κλήση εγγραφής μπλοκάρει μέχρι να ελευθερωθεί χώρος
+%%\item Αν δεν υπάρχουν ανοιχτά άκρα εγγραφής, τότε η ανάγνωση στο pipe επιστρέφει 0, end of file
+%%\item Αν δεν υπάρχουν ανοιχτά άκρα ανάγνωσης, τότε εγγραφή στο pipe επιστρέφει το error EPIPE
+%%\end{itemize}
+%%\end{block}
+%%\end{frame}
 
 \begin{frame}
 \frametitle{Γενική εικόνα}
@@ -238,36 +238,36 @@ Pipe semantics:
 \end{block}
 \end{frame}
 
-\subsection{Πρώτο στάδιο υλοποίησης}
-
-\begin{frame}
-\frametitle{Πρώτο στάδιο υλοποίησης}
-\begin{block}{function call}
-\begin{itemize}
-\item Στον κώδικα της εφαρμογής
-\item Δημιουργία δύο sockets (TCP)
-\item Επιστροφή των δύο sockets
-\item Διεύθυνση παραλήπτη
-\item Δεν υλοποιήθηκαν όλα τα semantics του pipe 
-\end{itemize}
-\end{block}
-\end{frame}
-
-\subsection{Δεύτερο στάδιο υλοποίησης}
-
-\begin{frame}
-\frametitle{Δεύτερο στάδιο υλοποίησης}
-\begin{block}{system call}
-\begin{itemize}
-\item Χρήση UDP sockets, αντί για TCP
-\item Δημιουργία system call για τον πυρήνα του NetBSD
-\item Δημιουργία δύο sockets
-\item Επιστρέφονται δύο file descriptors
-\item ioctl κλήση, για τη διεύθυνση του παραλήπτη
-\item Δεν υλοποιήθηκαν όλα τα semantics του pipe 
-\end{itemize}
-\end{block}
-\end{frame}
+%%\subsection{Πρώτο στάδιο υλοποίησης}
+%%
+%%\begin{frame}
+%%\frametitle{Πρώτο στάδιο υλοποίησης}
+%%\begin{block}{function call}
+%%\begin{itemize}
+%%\item Στον κώδικα της εφαρμογής
+%%\item Δημιουργία δύο sockets (TCP)
+%%\item Επιστροφή των δύο sockets
+%%\item Διεύθυνση παραλήπτη
+%%\item Δεν υλοποιήθηκαν όλα τα semantics του pipe 
+%%\end{itemize}
+%%\end{block}
+%%\end{frame}
+%%
+%%\subsection{Δεύτερο στάδιο υλοποίησης}
+%%
+%%\begin{frame}
+%%\frametitle{Δεύτερο στάδιο υλοποίησης}
+%%\begin{block}{system call}
+%%\begin{itemize}
+%%\item Χρήση UDP sockets, αντί για TCP
+%%\item Δημιουργία system call για τον πυρήνα του NetBSD
+%%\item Δημιουργία δύο sockets
+%%\item Επιστρέφονται δύο file descriptors
+%%\item ioctl κλήση, για τη διεύθυνση του παραλήπτη
+%%\item Δεν υλοποιήθηκαν όλα τα semantics του pipe 
+%%\end{itemize}
+%%\end{block}
+%%\end{frame}
 
 \subsection{Τρίτο στάδιο υλοποίησης}
 \begin{frame}
@@ -313,29 +313,29 @@ Pipe semantics:
 \end{figure}
 \end{frame}
 
-\begin{frame}
-\frametitle{Τρίτο στάδιο υλοποίησης}
-\begin{columns}
-\column{.4\textwidth}
-\includegraphics[scale=0.4]{figures/pipe_read.png}
-\column{.4\textwidth}
-\includegraphics[scale=0.4]{figures/pipe_write.png}
-\end{columns}
-\end{frame}
+%%\begin{frame}
+%%\frametitle{Τρίτο στάδιο υλοποίησης}
+%%\begin{columns}
+%%\column{.4\textwidth}
+%%\includegraphics[scale=0.4]{figures/pipe_read.png}
+%%\column{.4\textwidth}
+%%\includegraphics[scale=0.4]{figures/pipe_write.png}
+%%\end{columns}
+%%\end{frame}
 
 \section{Μηχανισμός fork}
 \subsection{Γενική εικόνα}
-\begin{frame}
-\frametitle{Γενική εικόνα}
-\begin{block}{fork system call}
-\begin{itemize}
-\item Δημιουργία νέας διεργασίας
-\item Η νέα διεργασία είναι ίδια με τη διεργασία γονέα
-\item Διαχωρισμός των δύο διεργασιών με τιμή επιστροφής από την κλήση συστήματος
-\item Διατήρηση ανοιχτών file descriptors στη διεργασία παιδί.
-\end{itemize}
-\end{block}
-\end{frame}
+%%\begin{frame}
+%%\frametitle{Γενική εικόνα}
+%%\begin{block}{fork system call}
+%%\begin{itemize}
+%%\item Δημιουργία νέας διεργασίας
+%%\item Η νέα διεργασία είναι ίδια με τη διεργασία γονέα
+%%\item Διαχωρισμός των δύο διεργασιών με τιμή επιστροφής από την κλήση συστήματος
+%%\item Διατήρηση ανοιχτών file descriptors στη διεργασία παιδί.
+%%\end{itemize}
+%%\end{block}
+%%\end{frame}
 
 \begin{frame}
 \frametitle{fork σε συμαβατικά ΛΣ}
@@ -381,28 +381,36 @@ Pipe semantics:
 \item Ενημέρωση των κοινών μεταβλητών του pipe (αν υπάρχει pipe)
 \item Εκκίνηση διαδικασίας migration
 \item Αναμονή για migration
-\item Εκκίνηση νέας εικονικής μηχανής με βάση το migration file
+\item Εκκίνηση νέας εικονικής μηχανής 
 \item Συγχρονισμός κοινής μνήμης
 \end{itemize}
 \end{block}
 \end{frame}
 
-\subsection{Βήματα}
-
 \begin{frame}
-\frametitle{Ενημέρωση κοινών μεταβλητών στο pipe}
-\begin{itemize}
-\item Αν υπάρχει pipe θα πρέπει να ενημερωθούν οι κοινές μεταβλητές
-\item Έλεγχος ύπαρξης pipe
-\item Αύξηση των μετρητών ανοιχτών άκρων
-\item Πρόσβαση στην κοινή μνήμη
-\end{itemize}
+\frametitle{Όλα τα βήματα}
+\begin{figure}
+\center
+\includegraphics[scale=0.38]{figures/fork_olo.png}
+\end{figure}
 \end{frame}
 
+\subsection{Βήματα}
+
+%%\begin{frame}
+%%\frametitle{Ενημέρωση κοινών μεταβλητών στο pipe}
+%%\begin{itemize}
+%%\item Αν υπάρχει pipe θα πρέπει να ενημερωθούν οι κοινές μεταβλητές
+%%\item Έλεγχος ύπαρξης pipe
+%%\item Αύξηση των μετρητών ανοιχτών άκρων
+%%\item Πρόσβαση στην κοινή μνήμη
+%%\end{itemize}
+%%\end{frame}
+
 \begin{frame}
-\frametitle{Εκκίνηση δημιουργίας migration file}
+\frametitle{Εκκίνηση του migration}
 \begin{block}{Από τη μεριά του rumprun}
-Hypercall για την εκκίνηση δημιουργίας migration file
+Hypercall για την εκκίνηση migration 
 \end{block}
 \begin{block}{Από τη μεριά του QEMU}
 \begin{itemize}
@@ -414,7 +422,7 @@ Hypercall για την εκκίνηση δημιουργίας migration file
 \end{frame}
 
 \begin{frame}
-\frametitle{Εκκίνηση δημιουργίας migration file}
+\frametitle{Εκκίνηση του migration}
 \begin{figure}
 \center
 \includegraphics[scale=0.57]{figures/fork_stage1.png}
@@ -426,28 +434,28 @@ Hypercall για την εκκίνηση δημιουργίας migration file
 \begin{block}{Από τη μεριά του rumprun}
 \begin{itemize}
 \item Busy wait 
-\item Σημείο εκκίνησης του unikernel παιδί.
+\item Σημείο εκκίνησης του unikernel-παιδί.
 \end{itemize}
 \end{block}
 \begin{block}{Από τη μεριά του QEMU}
 \begin{itemize}
 \item Κατάσταση του migration thread
-\item Hypercalls counter
+\item Διαχωρισμός γονέα-παιδιού
 \end{itemize}
 \end{block}
 \end{frame}
 
-\begin{frame}
-\frametitle{Αναμονή για την περάτωση του migration}
-\begin{block}{Hypercalls counter}
-\begin{itemize}
-\item Διάκριση παιδιού, γονέα
-\item Διαφορετικοί counters για κάθε vm
-\item Migration, χρονοβόρα διαδικασία
-\item Ένα ακριβώς hypercall από το παιδί
-\end{itemize}
-\end{block}
-\end{frame}
+%%\begin{frame}
+%%\frametitle{Αναμονή για την περάτωση του migration}
+%%\begin{block}{Hypercalls counter}
+%%\begin{itemize}
+%%\item Διάκριση παιδιού, γονέα
+%%\item Διαφορετικοί counters για κάθε vm
+%%\item Migration, χρονοβόρα διαδικασία
+%%\item Ένα ακριβώς hypercall από το παιδί
+%%\end{itemize}
+%%\end{block}
+%%\end{frame}
 
 \begin{frame}
 \frametitle{Αναμονή για την περάτωση του migration}
@@ -472,30 +480,22 @@ Hypercall για την εκκίνηση νέας εικονικής μηχαν�
 \end{frame}
 
 \begin{frame}
-\frametitle{Εκκίνηση δημιουργίας migration file}
+\frametitle{Εκκίνηση νέας εικονικής μηχανής}
 \begin{figure}
 \center
 \includegraphics[scale=0.57]{figures/fork_stage2.png}
 \end{figure}
 \end{frame}
 
-\begin{frame}
-\frametitle{Συγχρονισμός εικονικής μνήμης}
-\begin{itemize}
-\item Μόνο στην περίπτωση χρήσης pipe
-\item Bug(?) κοινής μνήμης
-\item Busy wait από το γονιό
-\item Εγγραφή στην κοινή μνήμη από το παιδί
-\end{itemize}
-\end{frame}
-
-\begin{frame}
-\frametitle{Όλα τα βήματα}
-\begin{figure}
-\center
-\includegraphics[scale=0.38]{figures/fork_olo.png}
-\end{figure}
-\end{frame}
+%%\begin{frame}
+%%\frametitle{Συγχρονισμός εικονικής μνήμης}
+%%\begin{itemize}
+%%\item Μόνο στην περίπτωση χρήσης pipe
+%%\item Bug(?) κοινής μνήμης
+%%\item Busy wait από το γονιό
+%%\item Εγγραφή στην κοινή μνήμη από το παιδί
+%%\end{itemize}
+%%\end{frame}
 
 \begin{frame}
 \frametitle{Όλα τα βήματα}
@@ -520,10 +520,18 @@ Hypercall για την εκκίνηση νέας εικονικής μηχαν�
 \end{frame}
 
 \begin{frame}
-\frametitle{Time for each step in fork}
+\frametitle{Χρόνος για κάθε βήμα}
 \begin{figure}
 \center
-\includegraphics[scale=0.6]{figures/fork_breakdown.png}
+\includegraphics[scale=0.42]{figures/fork_breakdown.png}
+\end{figure}
+\end{frame}
+
+\begin{frame}
+\frametitle{Ιδανική σύγκριση}
+\begin{figure}
+\center
+\includegraphics[scale=0.45]{figures/ideal_comparison.png}
 \end{figure}
 \end{frame}
 
