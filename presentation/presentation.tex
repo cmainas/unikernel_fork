@@ -56,9 +56,9 @@ WWW: \url{http://cslab.ece.ntua.gr/research/}\\
 \end{block}
 \begin{block}{Αναλύοντας τον ορισμό}
 \begin{itemize}
-\item Εξειδικευμένες: κάθε unikernel περιέχει μία και μόνο εφαρμογή και έχει χτιστεί με σκοπό την υποστήριξη μόνο αυτής.
-\item Μοναδικός χώρος διευθύνσεων: δεν υπάρχει διαχωρισμός kernel space και user space.
-\item library operating systems: λειτουργικά συστήματα που παρέχουν τις υπηρεσίες που υποστηρίζουν (π.χ. networking) σε μορφή βιβλιοθηκών, οι οποίες μπορούν να χρησιμοποιηθούν (link) από τις εφαμρογές.
+\item Εξειδικευμένες
+\item Μοναδικός χώρος διευθύνσεων
+\item library operating systems
 \end{itemize}
 \end{block}
 \end{frame}
@@ -83,9 +83,8 @@ WWW: \url{http://cslab.ece.ntua.gr/research/}\\
 \begin{block}{Μειονεκτήματα}
 	%%TODO: prepei na to ksanadw auto to kommati
 \begin{itemize}
-\item Οι εφαρμογές χρειάζονται porting
-\item Πολλές βιβλιοθήκες μπορεί να μην υποστηρίζονται
-\item Πολλά components των OSes μπορεί να μην υποστηρίζονται (single process)
+\item Porting
+\item Μικρότερη υποστήριξη 
 \end{itemize}
 \end{block}
 \end{frame}
@@ -96,7 +95,7 @@ WWW: \url{http://cslab.ece.ntua.gr/research/}\\
 \frametitle{Unikernel frameworks}
 	\begin{block}{Rumprun}
 		\begin{itemize}
-			\item Είναι βασισμένο στο NetBSD και συγκεκριμένα στα rump kernels 
+			\item Βασισμένο στο NetBSD και συγκεκριμένα στα rump kernels 
 			\item POSIX friendly
 			\item Υποστήριξη για threads, filesystem
 			\item Υποστηρίζει πολλές γλώσσες
@@ -108,7 +107,7 @@ WWW: \url{http://cslab.ece.ntua.gr/research/}\\
 \frametitle{Unikernel frameworks}
 	\begin{block}{OSv}
 		\begin{itemize}
-			\item Είναι φτιαγμένο από την αρχή, με στόχο να εκτελείται στο cloud
+			\item Φτιαγμένο από την αρχή, με στόχο την εκτέλεση στο cloud
 			\item POSIX compatible
 			\item Υποστήριξη για threads, filesystem.
 			\item Υποστηρίζει πολλές γλώσσες
@@ -121,11 +120,11 @@ WWW: \url{http://cslab.ece.ntua.gr/research/}\\
 \frametitle{Unikernel frameworks}
 	\begin{block}{IncludeOS}
 		\begin{itemize}
-			\item Είναι φτιαγμένο από την αρχή
+			\item Φτιαγμένο από την αρχή
 			\item Μερικώς POSIX compatible
-			\item single threaded
+			\item Single threaded
 			\item Ταχύτατα αναπτυσσόμενο project
-			\item Μόνο εφαμρογές σε C++ μπορούν να εκτελεστούν σε αυτό
+			\item Υποστήριξη μόνο για εγαρμογές σε C++
 		\end{itemize}
 	\end{block}
 \end{frame}
@@ -133,8 +132,8 @@ WWW: \url{http://cslab.ece.ntua.gr/research/}\\
 \frametitle{Unikernel frameworks}
 	\begin{block}{MirageOS}
 		\begin{itemize}
-			\item Είναι φτιαγμένο από την αρχή και είναι γραμμένο σε OCaml
-			\item Μόνο εφαρμογές σε OCaml μπορούν να εκτελεστούν σε αυτό
+			\item Φτιαγμένο από την αρχή χρησιμοποιώντας OCaml
+			\item Υποστήριξη μόνο για εφαρμογές σε OCaml
 			\item Από τα πιο παλιά unikernel frameworks
 		\end{itemize}
 	\end{block}
@@ -177,15 +176,15 @@ WWW: \url{http://cslab.ece.ntua.gr/research/}\\
 \frametitle{Βασική ιδέα}
 \begin{block}{single process}
 \begin{itemize}
-\item Βασικό κοινό χαρακτηριστικό όλων των unikernels, είναι ότι είναι single process
-\item Συνεπώς δεν υποστηρίζεται η κλήση fork, σε κανένα unikernel
+\item Βασικό κοινό χαρακτηριστικό όλων των unikernels: single process
+\item Δεν υποστηρίζεται η κλήση fork
 \end{itemize}
 \end{block}
 \begin{block}{Ιδέα}
 \begin{itemize}
-\item Προσπαθούμε να κάνουμε τα unikernels όσο πιο πολύ POSIX friendly γίνεται
-\item Θέλουμε να κρατήσουμε τα βασικά χαρακτηριστικά των unikernels
-\item Αντιλαμβανόμαστε τα unikernels ως διεργασίες και το hypervisor ως λειτουργικό συτημα
+\item POSIX friendly 
+\item Διατήρηση βασικών χαρακτηριστικών unikernels
+\item Unikernels ως διεργασίες και hypervisor ως λειτουργικό συτημα
 \end{itemize}
 \end{block}
 \end{frame}
@@ -194,14 +193,15 @@ WWW: \url{http://cslab.ece.ntua.gr/research/}\\
 \frametitle{Αντικείμενο διπλωματικής}
 \begin{block}{Μηχανισμός fork}
 \begin{itemize}
-\item Με βάση αυτή την ιδέα, υλοποιούμε ένα μηχανσιμό fork, ο οποίος αντί για τη δημιουργία μίας νέας διεργασίας εντός του unikernel, έχει ως αποτέλεσμα τη δημιουργία ενός νέου unikernel
-\item Ουσιαστικά μεταφέρουμε το μηχανσιμό fork, από το επίπεδο των διεργασιών στο επίπεδο των εικονικών μηχανών
+\item Αντί για δημιουργία νέας διεργασίας στο υπάρχον unikernel
+\item Δημιουργία νέου unikernel
+\item Από το επίπεδο των διεργασιών στο επίπεδο των εικονικών μηχανών
 \end{itemize}
 \end{block}
-\begin{block}{Μηχανσιμός pipe}
+\begin{block}{Μηχανισμός pipe}
 \begin{itemize}
-\item Συχνό φαινόμενο όταν δημιουργείται μία νέα διεργασία είναι να επικοινωνεί αυτή με τη διεργασία γονέας
-\item Μία από τις πιο συνήθεις πρακτικές για αυτό το σκοπό είναι η χρήση του μηχανσιμού pipe
+\item Επικοινωνία μεταξύ δύο διεργασιών
+\item Συνήθης πρακτική, pipe
 \item Κατασκευή ενός μηχανισμού pipe σε επίπεδο εικονικών μηχανών. 
 \end{itemize}
 \end{block}
@@ -227,7 +227,7 @@ Pipe semantics:
 \begin{frame}
 \frametitle{Γενική εικόνα}
 \begin{block}{Pipe σε unikernels}
-Η κλήση συστήματος pipe χρησιμοποιείται από τα unikernels, όπως θα χρησιμοποιούταν από τις διεργασίες σε ένα συμβατικό ΛΣ>
+Χρήση του pipe για unikernels, όπως και στις διεργασίες ενός συμβατικού ΛΣ.
 \end{block}
 \begin{block}{Τρία στάδια υλοποίησης}
 \begin{enumerate}
@@ -244,10 +244,10 @@ Pipe semantics:
 \frametitle{Πρώτο στάδιο υλοποίησης}
 \begin{block}{function call}
 \begin{itemize}
-\item Προσθέτουμε στον κώδικα της εφαρμογής, το function call pipe
-\item Καλώντας τη συνάρτηση δημιουργούνται δύο sockets, ένα για την αποστολή και ένα για τη λήψη δεδομένων. 
-\item Τα δύο αυτά sockets επιστρέφονται και μπορούν να χρησιμοποιηθούν αντίστοιχα
-\item Η διεύθυνση του παραλήπτη, ορίζεται στον κώδικα της εφαρμογής
+\item Στον κώδικα της εφαρμογής
+\item Δημιουργία δύο sockets
+\item Επιστροφή των δύο sockets.
+\item Διεύθυνση παραλήπτη
 \item Δεν υλοποιήθηκαν όλα τα semantics του pipe 
 \end{itemize}
 \end{block}
@@ -261,9 +261,9 @@ Pipe semantics:
 \begin{itemize}
 \item Χρήση UDP sockets, αντί για TCP
 \item Δημιουργία system call για τον πυρήνα του NetBSD
-\item Δημιουργία δύο sockets, ένα για αποστολή και ένα για λήψη δεδομένων.
-\item Επιστρέφονται δύο file descriptors, ένα για εγγραφή και ένα για ανάγνωση.
-\item Η διεύθυνση του παραλήπτη, ορίζεται μέσω μίας κλήσης ioctl στο άκρο εγγραφής του pipe.
+\item Δημιουργία δύο sockets
+\item Επιστρέφονται δύο file descriptors
+\item ioctl κλήση, για τη διεύθυνση του παραλήπτη
 \item Δεν υλοποιήθηκαν όλα τα semantics του pipe 
 \end{itemize}
 \end{block}
@@ -275,8 +275,8 @@ Pipe semantics:
 \begin{block}{system call}
 \begin{itemize}
 \item Χρήση κοινής μνήμης μεταξύ των εικονικών μηχανών (ivshmem - nahanni)
-\item Επιστρέφονται δύο file descriptors, ένα για εγγραφή και ένα για ανάγνωση.
-\item Μόνο για unikernels που μοιράζονται τον ίδιο host
+\item Επιστρέφονται δύο file descriptors
+\item Ίδιος host
 \item Υλοποιήθηκαν όλα τα semantics του pipe 
 \end{itemize}
 \end{block}
@@ -286,15 +286,15 @@ Pipe semantics:
 \frametitle{Τρίτο στάδιο υλοποίησης}
 \begin{block}{ivshmem}
 \begin{itemize}
-\item Για την κοινή μνήμη χρησιμοποιήθηκε ο μηχανισμός ivshmem - nahanni
-\item Επιτρέπει την κοινή μνήμη μεταξύ δύο εικωνικών μηχανών σε QEMU
-\item Πρέπει να υλοποιηθεί ένας PCI driver για τη χρήση του
+\item Χρήση του μηχανισμού ivshmem - nahanni
+\item Κοινή μνήμη μεταξύ δύο εικoνικών μηχανών σε QEMU
+\item PCI driver 
 \end{itemize}
 \end{block}
 \begin{block}{Υλοποίηση}
 \begin{itemize}
-\item PCI driver για το NetBSD και το rumprun
-\item Pipe system call που χρησιμοποιεί την κοινή μνήμη
+\item PCI driver 
+\item Pipe system call 
 \end{itemize}
 \end{block}
 \end{frame}
@@ -303,8 +303,8 @@ Pipe semantics:
 \frametitle{Τρίτο στάδιο υλοποίησης}
 \begin{block}{Υλοποίηση}
 \begin{itemize}
-\item PCI driver για το NetBSD και το rumprun
-\item Pipe system call που χρησιμοποιεί την κοινή μνήμη
+\item PCI driver 
+\item Pipe system call 
 \end{itemize}
 \end{block}
 \begin{figure}
@@ -332,12 +332,12 @@ Pipe semantics:
 \item Δημιουργία νέας διεργασίας
 \item Η νέα διεργασία είναι ίδια με τη διεργασία γονέα
 \item Διαχωρισμός των δύο διεργασιών με τιμή επιστροφής από την κλήση συστήματος
-\item Τα ανοιχτά file descriptors της διεργασίας γονέα, διατηρούνται και στη διεργασία παιδί
+\item Διατήρηση ανοιχτών file descriptors στη διεργασία παιδί.
 \end{itemize}
 \end{block}
 \pause
 \begin{block}{Στόχος}
-Η μεταφορά της ίδιας λειτουργίας σε επίπεδο εικονικών μηχανών
+Μεταφορά της ίδιας λειτουργίας σε επίπεδο εικονικών μηχανών
 \end{block}
 \end{frame}
 
@@ -345,8 +345,8 @@ Pipe semantics:
 \frametitle{Γενική εικόνα}
 \begin{block}{Υλοποίηση}
 \begin{itemize}
-\item Χρήση του μηχανισμού migration, που παρέχει το QEMU, με μικρές αλλαγές
-\item hypercalls από το fork system call του rumprun
+\item Μηχανισμός migration του QEMU
+\item hypercalls 
 \end{itemize}
 \end{block}
 \begin{block}{Βήματα}
@@ -355,6 +355,7 @@ Pipe semantics:
 \item Εκκίνηση διαδικασίας migration
 \item Αναμονή για migration
 \item Εκκίνηση νέας εικονικής μηχανής με βάση το migration file
+\item Συγχρονισμός κοινής μνήμης
 \end{itemize}
 \end{block}
 \end{frame}
@@ -381,9 +382,9 @@ Pipe semantics:
 \frametitle{Ενημέρωση κοινών μεταβλητών στο pipe}
 \begin{itemize}
 \item Αν υπάρχει pipe θα πρέπει να ενημρωθούν οι κοινές μεταβλητές
-\item Έλεγχος ύπαρξης pipe, μέσω των ανοιχτών file descriptors της εφαρμογής
+\item Έλεγχος ύπαρξης pipe
 \item Αύξηση των μετρητών ανοιχτών άκρων
-\item Χάρις το migration, η εικονική μηχανή παιδί θα έχει πρόσβαση στην κοινή μνήμη
+\item Πρόσβαση στην κοινή μνήμη
 \end{itemize}
 \end{frame}
 
@@ -394,10 +395,9 @@ Hypercall για την εκκίνηση δημιουργίας migration file
 \end{block}
 \begin{block}{Από τη μεριά του QEMU}
 \begin{itemize}
-\item Χρήση του μηχανισμού migration του QEMU
-\item Δημιουργία ενος thread, που αναλαμβάνει αυτή την εργασία
-\item Μικρές αλλαγές στον κώδικα του migration, ώστε να μη σταματήσει η λειτουργία της εικονικής μηχανής γονέας
-\item Καθόλη τη διάρκεια του migration η εικονική μηχανή θα πρέπει να εκτελείται
+\item Χρήση του μηχανισμού migration
+\item Migration thread
+\item Λειτουργία της εικονικής μηχανής γονέας
 \end{itemize}
 \end{block}
 \end{frame}
@@ -406,14 +406,14 @@ Hypercall για την εκκίνηση δημιουργίας migration file
 \frametitle{Αναμονή για την περάτωση του migration}
 \begin{block}{Από τη μεριά του rumprun}
 \begin{itemize}
-\item Busy wait με συνεχή hypercalls
-\item Είναι το σημείο που θα εκκινήσει τη λειτουργεία του το unikernel παιδί.
+\item Busy wait 
+\item Σημείο εκκίνησης του unikernel παιδί.
 \end{itemize}
 \end{block}
 \begin{block}{Από τη μεριά του QEMU}
 \begin{itemize}
-\item Για κάθε hypercall ελέγχεται αν το migration thread εκτελείται ακόμα
-\item Διατήρηση counter, για τα πόσα hypercalls γίνονται
+\item Κατάσταση του migration thread
+\item Hypercalls counter
 \end{itemize}
 \end{block}
 \end{frame}
@@ -422,10 +422,10 @@ Hypercall για την εκκίνηση δημιουργίας migration file
 \frametitle{Αναμονή για την περάτωση του migration}
 \begin{block}{Hypercalls counter}
 \begin{itemize}
-\item Με αυτόν διακρίνουμε αν πρόκειται για το παιδί ή το γονέα
-\item Κάθε εικονική μηχανή στο QEMU είναι μία ξεχωριστή διεργασία, άρα διαφορετικοί counters για κάθε vm
-\item Migration είναι χρονοβόρα διαδικασία, ο γονέας θα κάνει αρκετά hypercalls
-\item Όταν θα εκκινήσει το παιδί το migration θα έχει ολοκληρωθεί, άρα ακριβώς ένα hypercall
+\item Διάκριση παιδιού, γονέα
+\item Διαφορετικοί counters για κάθε vm
+\item Migration, χρονοβόρα διαδικασία
+\item Ένα ακριβώς hypercall από το παιδί
 \end{itemize}
 \end{block}
 \end{frame}
@@ -446,8 +446,8 @@ Hypercall για την εκκίνηση νέας εικονικής μηχαν�
 \begin{block}{Από τη μεριά του QEMU}
 \begin{itemize}
 \item fork 
-\item Επιστροφή στoν γονέα το process id της νέας διεργασίας
-\item Εκκίνηση νέας εικονικής μηχανής με βάση το migration file 
+\item Επιστροφή process id 
+\item Εκκίνηση νέας εικονικής μηχανής 
 \end{itemize}
 \end{block}
 \end{frame}
@@ -455,10 +455,10 @@ Hypercall για την εκκίνηση νέας εικονικής μηχαν�
 \begin{frame}
 \frametitle{Συγχρονισμός εικονικής μνήμης}
 \begin{itemize}
-\item Μόνο στην περίπτωση που χρησιμοποιείται pipe
-\item Παρατηρήθηκε ότι αν το παιδί δε γράψει κάτι στην κοινή μνήμη, τότε το παιδί δεν μπορεί να διαβάσει τα δεδομένα που γράφει ο γονιός
-\item Busy wait από το γονιό, να αλλάξει μία τιμή το παιδί
-\item Το παιδί, απλά γράφει μία προκαθορισμένη τιμή σε μία συγκεκριμένη θέση μνήμης
+\item Μόνο στην περίπτωση χρήσης pipe
+\item Bug(?) κοινής μνήμης
+\item Busy wait από το γονιό
+\item Εγγραφή στην κοινή μνήμη από το παιδί
 \end{itemize}
 \end{frame}
 
@@ -467,11 +467,11 @@ Hypercall για την εκκίνηση νέας εικονικής μηχαν�
 \frametitle{Μετρήσεις}
 \begin{block}{Σύγκριση fork}
 \begin{itemize}
-\item Σύγκριση fork σε linux πυρήνα και του fork που δημιουργήσαμε
+\item Σύγκριση fork σε linux πυρήνα και του δικού μας fork 
 \item Σε ίδια έκδοση QEMU (2.11.2)
 \item Linux 4.9.0-7-amd64 \#1 SMP Debian 4.9.110-3+deb9u2
 \item Linux: 0.541ms, Unikernel: 137,423ms
-\item Λογική η διαφορά, αλλά γιατί τόσο μεγάλη?
+\item Διαφορά
 \end{itemize}
 \end{block}
 \end{frame}
@@ -490,17 +490,17 @@ Hypercall για την εκκίνηση νέας εικονικής μηχαν�
 
 \begin{frame}
 \frametitle{Σύνοψη}
-Τα unikernels:
+Unikernels:
 \begin{itemize}
-\item αποτελούν μία αρκετά ενδιαφέρουσα τεχνολογία
-\item έχουν διαφορετικούς στόχους ανάλογα με το project
-\item (μερικά frameworks) προσπαθούν να είναι POSIX compatible
-\item είναι από μόνα τους single process
+\item Ενδιαφέρουσα τεχνολογία
+\item Διαφορετικοί στόχοι 
+\item POSIX compatible
+\item Single process
 \end{itemize}
 \begin{block}{Αντιμετόπιση των unikernels ως διεργασίες}
 \begin{itemize}
 \item Μηχανισμός pipe για unikernels σε ίδιο και διαφορετικό host
-\item Μηχανσιμός fork για unikernels σε ίδιο host
+\item Μηχανισμός fork για unikernels σε ίδιο host
 \end{itemize}
 \end{block}
 %\end{block}
@@ -509,9 +509,9 @@ Hypercall για την εκκίνηση νέας εικονικής μηχαν�
 \begin{frame}
 \frametitle{Μελλοντικές Επεκτάσεις}
 \begin{itemize}
-\item Χρήση σημάτων, ώστε να μη βασίζεται ο μηχανισμός pipe τόσο στην κοινή μνήμη
-\item Επέκταση των inter-unikernel μηχανισμών επικοινωνίας (signaling, message queues)
-\item Βελτίωση μηχανισμού fork, δημιουργώντας καλύτερο migration μηχανισμό
+\item Χρήση σημάτων, για τη βελτίωση του μηχνασιμού pipe
+\item Επέκταση inter-unikernel μηχανισμών επικοινωνίας 
+\item Βελτίωση μηχανισμού fork
 \item Επέκταση του μηχανισμού και σε άλλες πλατφόρμες.
 \end{itemize}
 %%Διαθέσιμο στο \url{https://github.com/HPSI/v4v}
